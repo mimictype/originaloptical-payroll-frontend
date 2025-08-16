@@ -40,3 +40,12 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Added container style to align content to the top */
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;  /* Align vertically to top */
+  align-items: center;          /* Keep horizontal centering */
+  min-height: 100vh;
+}
