@@ -8,31 +8,12 @@ const EmployeeList = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
   // Initialize with default values to avoid null state
   const now = new Date();
   const currentRocYear = now.getFullYear() - 1911;
   const currentMonth = now.getMonth() + 1;
   const [selectedYear, setSelectedYear] = useState<number>(currentRocYear);
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
-
-  // モバイル判定
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    
-    // 初期チェック
-    checkIfMobile();
-    
-    // リサイズ時にチェック
-    window.addEventListener('resize', checkIfMobile);
-    
-    // クリーンアップ
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-    };
-  }, []);
 
   // 日期変更時の処理
   const handleDateChange = (year: number, month: number) => {
@@ -66,12 +47,10 @@ const EmployeeList = () => {
 
   const handleRecordSelect = (record: Record) => {
     setSelectedRecord(record);
-    // モバイル表示時は選択後に詳細までスクロール
-    if (isMobile && selectedRecord) {
-      setTimeout(() => {
-        document.querySelector('.payroll-details')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    }
+    // 選択後に詳細までスクロール
+    setTimeout(() => {
+      document.querySelector('.payroll-details')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
   const formatCurrency = (amount: number) => {
@@ -86,11 +65,10 @@ const EmployeeList = () => {
     return record.subtotal_A + record.subtotal_B - record.subtotal_C;
   };
 
-  // モバイル向けのテーブル列を制限
-  const mobileColumns = [
-    { key: 'pay_date', label: '發薪日期' },
+  // テーブル列を従業員ID、名前、詳細ボタンのみに制限
+  const tableColumns = [
+    { key: 'employee_id', label: '員工ID' },
     { key: 'name', label: '姓名' },
-    { key: 'total', label: '總計' },
     { key: 'action', label: '操作' }
   ];
 
@@ -116,25 +94,9 @@ const EmployeeList = () => {
           <table>
             <thead>
               <tr>
-                {isMobile ? (
-                  // モバイル表示用の簡略化されたヘッダー
-                  mobileColumns.map(column => (
-                    <th key={column.key}>{column.label}</th>
-                  ))
-                ) : (
-                  // デスクトップ表示用の完全なヘッダー
-                  <>
-                    <th>發薪日期</th>
-                    <th>員工ID</th>
-                    <th>姓名</th>
-                    <th>底薪</th>
-                    <th>固定項目</th>
-                    <th>變動項目</th>
-                    <th>扣除項目</th>
-                    <th>總計</th>
-                    <th>操作</th>
-                  </>
-                )}
+                {tableColumns.map(column => (
+                  <th key={column.key}>{column.label}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -144,48 +106,19 @@ const EmployeeList = () => {
                   className={selectedRecord?.id === record.id ? 'selected' : ''}
                   onClick={() => handleRecordSelect(record)}
                 >
-                  {isMobile ? (
-                    // モバイル表示用の簡略化された行
-                    <>
-                      <td>{record.pay_date}</td>
-                      <td>{record.name}</td>
-                      <td>{formatCurrency(calculateTotal(record))}</td>
-                      <td>
-                        <button 
-                          className="detail-button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRecordSelect(record);
-                          }}
-                        >
-                          詳細
-                        </button>
-                      </td>
-                    </>
-                  ) : (
-                    // デスクトップ表示用の完全な行
-                    <>
-                      <td>{record.pay_date}</td>
-                      <td>{record.employee_id}</td>
-                      <td>{record.name}</td>
-                      <td>{formatCurrency(record.base_salary)}</td>
-                      <td>{formatCurrency(record.subtotal_A - record.base_salary)}</td>
-                      <td>{formatCurrency(record.subtotal_B)}</td>
-                      <td>{formatCurrency(record.subtotal_C)}</td>
-                      <td>{formatCurrency(calculateTotal(record))}</td>
-                      <td>
-                        <button 
-                          className="detail-button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRecordSelect(record);
-                          }}
-                        >
-                          詳細
-                        </button>
-                      </td>
-                    </>
-                  )}
+                  <td>{record.employee_id}</td>
+                  <td>{record.name}</td>
+                  <td>
+                    <button 
+                      className="detail-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRecordSelect(record);
+                      }}
+                    >
+                      詳細
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -197,14 +130,12 @@ const EmployeeList = () => {
         <div className="payroll-details">
           <div className="payroll-details-header">
             <h3>{selectedRecord.name} 的薪資詳細資料 ({selectedRecord.pay_date})</h3>
-            {isMobile && (
-              <button 
-                className="close-details"
-                onClick={() => setSelectedRecord(null)}
-              >
-                ← 返回列表
-              </button>
-            )}
+            <button 
+              className="close-details"
+              onClick={() => setSelectedRecord(null)}
+            >
+              ← 返回列表
+            </button>
           </div>
           
           {/* 基本情報 セクション */}
