@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchRecords } from '../services/api';
 import type { Record } from '../types';
+import DateSelector from './DateSelector';
 
 const EmployeeList = () => {
   const [records, setRecords] = useState<Record[]>([]);
@@ -8,6 +9,12 @@ const EmployeeList = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  // Initialize with default values to avoid null state
+  const now = new Date();
+  const currentRocYear = now.getFullYear() - 1911;
+  const currentMonth = now.getMonth() + 1;
+  const [selectedYear, setSelectedYear] = useState<number>(currentRocYear);
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
 
   // モバイル判定
   useEffect(() => {
@@ -27,12 +34,24 @@ const EmployeeList = () => {
     };
   }, []);
 
+  // 日期変更時の処理
+  const handleDateChange = (year: number, month: number) => {
+    console.log(`EmployeeList received date change: ${year}年 ${month}月`);
+    setSelectedYear(year);
+    setSelectedMonth(month);
+  };
+
+  // レコード読み込み
   useEffect(() => {
+    console.log(`Fetching records for: ${selectedYear}年 ${selectedMonth}月`);
+    
     const getRecords = async () => {
       try {
         setLoading(true);
-        const data = await fetchRecords();
+        const data = await fetchRecords(selectedYear, selectedMonth);
+        console.log(`Fetched ${data.length} records for ${selectedYear}年 ${selectedMonth}月`);
         setRecords(data);
+        setSelectedRecord(null); // 日付変更時に選択を解除
         setError(null);
       } catch (err) {
         setError('獲取薪資記錄失敗，請稍後再試。');
@@ -43,7 +62,7 @@ const EmployeeList = () => {
     };
 
     getRecords();
-  }, []);
+  }, [selectedYear, selectedMonth]);
 
   const handleRecordSelect = (record: Record) => {
     setSelectedRecord(record);
@@ -79,11 +98,20 @@ const EmployeeList = () => {
     <div className="employee-list-container">
       <h2>薪資記錄列表</h2>
       
+      {/* 年月選擇器 */}
+      <DateSelector onDateChange={handleDateChange} />
+      
       {loading && <p>載入中...</p>}
       
       {error && <div className="error">{error}</div>}
       
-      {!loading && !error && (
+      {!loading && !error && records.length === 0 && (
+        <div className="empty-state">
+          <p>該月份沒有薪資記錄</p>
+        </div>
+      )}
+      
+      {!loading && !error && records.length > 0 && (
         <div className="table-container">
           <table>
             <thead>
