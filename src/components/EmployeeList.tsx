@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
-import { fetchRecords } from '../services/api';
+import { fetchRecords, fetchEmployees } from '../services/api';
 import type { Record } from '../types';
+import type { Employee } from '../types/employee';
 import DateSelector from './DateSelector';
+import EmployeeSelect from './EmployeeSelect';
 
 const EmployeeList = () => {
   const [records, setRecords] = useState<Record[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
@@ -45,6 +48,22 @@ const EmployeeList = () => {
     getRecords();
   }, [selectedYear, selectedMonth]);
 
+  // 従業員データの読み込み
+  useEffect(() => {
+    const getEmployees = async () => {
+      try {
+        const data = await fetchEmployees();
+        console.log(`Fetched ${data.length} employees`);
+        setEmployees(data);
+      } catch (err) {
+        console.error('従業員データの取得に失敗しました', err);
+        // エラーメッセージは表示しない（オプション）
+      }
+    };
+
+    getEmployees();
+  }, []);
+
   const handleRecordSelect = (record: Record) => {
     setSelectedRecord(record);
     // 選択後に詳細までスクロール
@@ -79,6 +98,25 @@ const EmployeeList = () => {
       {/* 年月選擇器 */}
       <DateSelector onDateChange={handleDateChange} />
       
+      {/* 従業員選択 */}
+      {employees.length > 0 && (
+        <EmployeeSelect
+          employees={employees}
+          onSelectEmployee={(employee) => {
+            console.log(`Selected employee: ${employee.name}`);
+            // 選択した従業員の記録を探す
+            const employeeRecord = records.find(record => record.employee_id === employee.employee_id);
+            if (employeeRecord) {
+              handleRecordSelect(employeeRecord);
+            } else {
+              // 選択した従業員の記録がない場合はメッセージを表示
+              setError(`${employee.name}の${selectedYear}年${selectedMonth}月の給与記録は見つかりませんでした。`);
+              setTimeout(() => setError(null), 3000); // 3秒後にエラーメッセージを消す
+            }
+          }}
+        />
+      )}
+      
       {loading && <p>載入中...</p>}
       
       {error && <div className="error">{error}</div>}
@@ -89,7 +127,7 @@ const EmployeeList = () => {
         </div>
       )}
       
-      {!loading && !error && records.length > 0 && (
+      {!loading && !error && records.length > 0 && !selectedRecord && (
         <div className="table-container">
           <table>
             <thead>
@@ -103,7 +141,6 @@ const EmployeeList = () => {
               {records.map((record) => (
                 <tr 
                   key={record.id}
-                  className={selectedRecord?.id === record.id ? 'selected' : ''}
                   onClick={() => handleRecordSelect(record)}
                 >
                   <td>{record.employee_id}</td>

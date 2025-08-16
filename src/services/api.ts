@@ -1,5 +1,34 @@
 // API服務的實現
 import type { Record } from '../types';
+import type { Employee, EmployeeListResponse } from '../types/employee';
+
+// 従業員一覧を取得する関数
+export const fetchEmployees = async (): Promise<Employee[]> => {
+  try {
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxbgH1F99F6wSIIDKW1CjRRHNCVJzZghjfLuOKeweJxT-uU-y877LgTE7TuYNQyxeG1/exec';
+    const response = await fetch(`${API_URL}?action=listEmployees`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+    
+    const data: EmployeeListResponse = await response.json();
+    
+    if (data.status !== 'success') {
+      throw new Error('Failed to fetch employees');
+    }
+    
+    return data.data;
+  } catch (error) {
+    console.error('従業員一覧の取得に失敗しました', error);
+    throw error;
+  }
+};
 
 // 獲取薪資記錄的函數
 export const fetchRecords = async (rocYear?: number, month?: number): Promise<Record[]> => {
@@ -30,7 +59,7 @@ const getMockRecords = (rocYear?: number, month?: number): Record[] => {
       user_email: "a124@example.com",
       name: "山田太郎",
       bank_name: "三井住友銀行",
-      bank_account: "1234567",
+      bank_account: "1112223",
       pay_date: "114-08-16",
 
       base_salary: 300000,
@@ -70,12 +99,12 @@ const getMockRecords = (rocYear?: number, month?: number): Record[] => {
       subtotal_C: 35000
     },
     {
-      id: "B347_1140816",
-      employee_id: "B347",
-      user_email: "b347@example.com",
-      name: "佐藤花子",
-      bank_name: "みずほ銀行",
-      bank_account: "7654321",
+      id: "A777_1140816",
+      employee_id: "A777",
+      user_email: "c567@example.com",
+      name: "鈴木一郎",
+      bank_name: "りそな銀行",
+      bank_account: "9876543",
       pay_date: "114-08-16",
 
       base_salary: 280000,
@@ -122,7 +151,7 @@ const getMockRecords = (rocYear?: number, month?: number): Record[] => {
       user_email: "a124@example.com",
       name: "山田太郎",
       bank_name: "三井住友銀行",
-      bank_account: "1234567",
+      bank_account: "1112223",
       pay_date: "114-07-16",
 
       base_salary: 300000,
@@ -162,12 +191,12 @@ const getMockRecords = (rocYear?: number, month?: number): Record[] => {
       subtotal_C: 35000
     },
     {
-      id: "B347_1140716",
-      employee_id: "B347",
-      user_email: "b347@example.com",
-      name: "佐藤花子",
-      bank_name: "みずほ銀行",
-      bank_account: "7654321",
+      id: "A777_1140716",
+      employee_id: "A777",
+      user_email: "c567@example.com",
+      name: "鈴木一郎",
+      bank_name: "りそな銀行",
+      bank_account: "9876543",
       pay_date: "114-07-16",
 
       base_salary: 280000,
