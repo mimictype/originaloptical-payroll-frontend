@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { fetchRecords, fetchEmployees } from '../services/api';
+import { fetchEmployees, fetchEmployeePayroll } from '../services/api';
 import type { Record } from '../types';
 import type { Employee } from '../types/employee';
 import DateSelector from './DateSelector';
 import EmployeeSelect from './EmployeeSelect';
 
 const EmployeeList = () => {
-  const [records, setRecords] = useState<Record[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,59 +16,68 @@ const EmployeeList = () => {
   const currentMonth = now.getMonth() + 1;
   const [selectedYear, setSelectedYear] = useState<number>(currentRocYear);
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
+  const [loadingDetails, setLoadingDetails] = useState<boolean>(false);
 
   // 日期変更時の処理
   const handleDateChange = (year: number, month: number) => {
     console.log(`EmployeeList received date change: ${year}年 ${month}月`);
     setSelectedYear(year);
     setSelectedMonth(month);
+    // 日付変更時に選択を解除
+    setSelectedRecord(null);
   };
-
-  // レコード読み込み
-  useEffect(() => {
-    console.log(`Fetching records for: ${selectedYear}年 ${selectedMonth}月`);
-    
-    const getRecords = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchRecords(selectedYear, selectedMonth);
-        console.log(`Fetched ${data.length} records for ${selectedYear}年 ${selectedMonth}月`);
-        setRecords(data);
-        setSelectedRecord(null); // 日付変更時に選択を解除
-        setError(null);
-      } catch (err) {
-        setError('獲取薪資記錄失敗，請稍後再試。');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getRecords();
-  }, [selectedYear, selectedMonth]);
 
   // 従業員データの読み込み
   useEffect(() => {
     const getEmployees = async () => {
       try {
+        setLoading(true);
         const data = await fetchEmployees();
         console.log(`Fetched ${data.length} employees`);
         setEmployees(data);
+        setError(null);
       } catch (err) {
         console.error('従業員データの取得に失敗しました', err);
-        // エラーメッセージは表示しない（オプション）
+        setError('従業員データの取得に失敗しました。再読み込みをお試しください。');
+      } finally {
+        setLoading(false);
       }
     };
 
     getEmployees();
   }, []);
 
-  const handleRecordSelect = (record: Record) => {
-    setSelectedRecord(record);
-    // 選択後に詳細までスクロール
-    setTimeout(() => {
-      document.querySelector('.payroll-details')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+  // 従業員の給与明細を取得する関数
+  const handleEmployeeSelect = async (employee: Employee) => {
+    try {
+      console.log(`Selected employee: ${employee.name}`);
+      setLoadingDetails(true);
+      setError(null);
+      
+      // 選択した従業員の給与明細を取得
+      const record = await fetchEmployeePayroll(
+        employee.employee_id, 
+        selectedYear, 
+        selectedMonth
+      );
+      
+      setSelectedRecord(record);
+      
+      // 詳細までスクロール
+      setTimeout(() => {
+        document.querySelector('.payroll-details')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      
+    } catch (err) {
+      console.error(`給与明細取得エラー:`, err);
+      setError(`${employee.name}の${selectedYear}年${selectedMonth}月の給与記録は見つかりませんでした。`);
+      setSelectedRecord(null);
+      
+      // 3秒後にエラーメッセージを消す
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setLoadingDetails(false);
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -84,13 +92,6 @@ const EmployeeList = () => {
     return record.subtotal_A + record.subtotal_B - record.subtotal_C;
   };
 
-  // テーブル列を従業員ID、名前、詳細ボタンのみに制限
-  const tableColumns = [
-    { key: 'employee_id', label: '員工ID' },
-    { key: 'name', label: '姓名' },
-    { key: 'action', label: '操作' }
-  ];
-
   return (
     <div className="employee-list-container">
       <h2>薪資記錄列表</h2>
@@ -98,75 +99,24 @@ const EmployeeList = () => {
       {/* 年月選擇器 */}
       <DateSelector onDateChange={handleDateChange} />
       
-      {/* 従業員選択 */}
-      {employees.length > 0 && (
-        <EmployeeSelect
-          employees={employees}
-          onSelectEmployee={(employee) => {
-            console.log(`Selected employee: ${employee.name}`);
-            // 選択した従業員の記録を探す
-            const employeeRecord = records.find(record => record.employee_id === employee.employee_id);
-            if (employeeRecord) {
-              handleRecordSelect(employeeRecord);
-            } else {
-              // 選択した従業員の記録がない場合はメッセージを表示
-              setError(`${employee.name}の${selectedYear}年${selectedMonth}月の給与記録は見つかりませんでした。`);
-              setTimeout(() => setError(null), 3000); // 3秒後にエラーメッセージを消す
-            }
-          }}
-        />
-      )}
-      
       {loading && <p>載入中...</p>}
       
       {error && <div className="error">{error}</div>}
       
-      {!loading && !error && records.length === 0 && (
-        <div className="empty-state">
-          <p>該月份沒有薪資記錄</p>
-        </div>
+      {/* 従業員選択 */}
+      {!loading && employees.length > 0 && (
+        <EmployeeSelect
+          employees={employees}
+          onSelectEmployee={handleEmployeeSelect}
+        />
       )}
       
-      {!loading && !error && records.length > 0 && !selectedRecord && (
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                {tableColumns.map(column => (
-                  <th key={column.key}>{column.label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {records.map((record) => (
-                <tr 
-                  key={record.id}
-                  onClick={() => handleRecordSelect(record)}
-                >
-                  <td>{record.employee_id}</td>
-                  <td>{record.name}</td>
-                  <td>
-                    <button 
-                      className="detail-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRecordSelect(record);
-                      }}
-                    >
-                      詳細
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
+      {loadingDetails && <p>明細を読み込み中...</p>}
+      
       {selectedRecord && (
         <div className="payroll-details">
           <div className="payroll-details-header">
-            <h3>{selectedRecord.name} 的薪資詳細資料 ({selectedRecord.pay_date})</h3>
+            <h3>{selectedRecord.name} の薪資詳細資料 ({selectedRecord.pay_date})</h3>
             <button 
               className="close-details"
               onClick={() => setSelectedRecord(null)}
