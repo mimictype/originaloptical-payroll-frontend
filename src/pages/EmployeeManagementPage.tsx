@@ -31,8 +31,7 @@ const EmployeeManagementPage = () => {
 
   // 従業員を選択した時の処理
   const handleEmployeeSelect = (employee: Employee) => {
-    // 詳細ページはまだ作成しないため、何もしない
-    // navigate(`/employee-management/${employee.employee_id}`);
+    navigate(`/employee-management/${employee.employee_id}`);
   };
 
   return (
@@ -45,6 +44,12 @@ const EmployeeManagementPage = () => {
           ← 首頁
         </button>
         <h2>員工管理</h2>
+        <button
+          className="create-employee"
+          onClick={() => navigate('/employee-management/create')}
+        >
+          新規作成
+        </button>
       </div>
       {loading && <p className="loading-message">載入中...</p>}
       {error && <div className="error-message">{error}</div>}

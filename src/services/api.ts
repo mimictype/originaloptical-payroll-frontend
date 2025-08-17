@@ -1,3 +1,51 @@
+// 従業員の作成
+export const createEmployee = async (payload: Partial<Employee>) => {
+  const params = new URLSearchParams();
+  params.append('action', 'createemployee');
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) params.append(key, String(value));
+  });
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+    },
+    body: params,
+  });
+  return await response.json();
+};
+
+// 従業員の更新
+export const updateEmployee = async (payload: Partial<Employee>) => {
+  const params = new URLSearchParams();
+  params.append('action', 'updateemployee');
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) params.append(key, String(value));
+  });
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+    },
+    body: params,
+  });
+  return await response.json();
+};
+
+// 従業員の削除
+export const deleteEmployee = async (employee_id: string) => {
+  const params = new URLSearchParams();
+  params.append('action', 'deleteemployee');
+  params.append('employee_id', employee_id);
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+    },
+    body: params,
+  });
+  return await response.json();
+};
 // API服務的實現
 import type { Record, LeaveDetail } from '../types';
 import type { Employee, EmployeeListResponse } from '../types/employee';
@@ -5,7 +53,7 @@ import { getCache, setCache } from '../utils/cache';
 
 
 // API URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbwExWStOE2YXxF-zxcmNV452I1FaiJU4MrHarF7DTm3dX865jeOKkP1krtxN-OK9IEQRQ/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwP1du1w3CEPLMqTSsynBEjlj7mHTRfR4pdFay4BReJEFB0dy_Pp7INTeTM-Wl6qpW13Q/exec';
 
 // Cache keys
 export const CACHE_KEYS = {
