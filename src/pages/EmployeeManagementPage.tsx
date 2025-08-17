@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchEmployees } from '../services/api';
+import { setCache } from '../utils/cache';
 import type { Employee } from '../types/employee';
 import '../components/employeeStyles.css';
 import './pageStyles.css';
@@ -17,9 +18,10 @@ const EmployeeManagementPage = () => {
     const getEmployees = async () => {
       try {
         setLoading(true);
-        const data = await fetchEmployees(true);
-        setEmployees(data);
-        setError(null);
+  const data = await fetchEmployees(true);
+  setEmployees(data);
+  setCache<Employee[]>("employees", data);
+  setError(null);
       } catch (err) {
         setError('従業員データの取得に失敗しました。再読み込みをお試しください。');
       } finally {

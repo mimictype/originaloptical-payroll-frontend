@@ -4,6 +4,7 @@ import type { Employee } from '../types/employee';
 import '../components/employeeStyles.css';
 import './pageStyles.css';
 import { createEmployee, updateEmployee, deleteEmployee } from '../services/api';
+import { getCache } from '../utils/cache';
 
 const defaultEmployee: Partial<Employee> = {
   employee_id: '',
@@ -27,12 +28,23 @@ const EmployeeManagementDetailPage = () => {
       if (mode === 'edit' && employee_id) {
         setLoading(true);
         setError(null);
+        // まずキャッシュから取得
+        const cachedEmployees = getCache<Employee[]>("employees");
+        let found: Employee | undefined;
+        if (cachedEmployees) {
+          found = cachedEmployees.find(e => e.employee_id === employee_id);
+        }
+        if (found) {
+          setEmployee(found);
+          setLoading(false);
+          return;
+        }
+        // キャッシュにない場合はAPI
         try {
-          // fetchEmployeesで全件取得し、該当IDを探す
           const employees = await import('../services/api').then(mod => mod.fetchEmployees(false));
-          const found = employees.find(e => e.employee_id === employee_id);
-          if (found) {
-            setEmployee(found);
+          const foundApi = employees.find(e => e.employee_id === employee_id);
+          if (foundApi) {
+            setEmployee(foundApi);
           } else {
             setError('従業員が見つかりません');
           }
