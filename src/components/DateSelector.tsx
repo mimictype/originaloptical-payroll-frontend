@@ -15,7 +15,8 @@ const DateSelector = ({ onDateChange }: DateSelectorProps) => {
   const [month, setMonth] = useState<number>(currentMonth);
   
   // Years and months for dropdown selection
-  const years = Array.from({ length: 20 }, (_, i) => rocYear - 10 + i).filter(y => y > 0);
+  // Show past 10 years + next year (12 years total), and filter years before ROC 114
+  const years = Array.from({ length: 12 }, (_, i) => currentRocYear - 10 + i).filter(y => y >= 114 && y <= currentRocYear + 1);
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
   
   // Dropdown visibility states
