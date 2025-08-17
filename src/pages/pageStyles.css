@@ -46,6 +46,9 @@
   padding: 20px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .employee-card:hover {
@@ -53,16 +56,27 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
+.employee-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 .employee-id {
   font-size: 14px;
   color: #666;
-  margin-bottom: 8px;
+  margin: 0;
+  background-color: #f0f7ff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  min-width: 70px;
+  text-align: center;
 }
 
 .employee-name {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin: 0;
   color: #333;
 }
 
@@ -82,22 +96,6 @@
 
 .account-number {
   font-family: monospace;
-}
-
-.view-payroll-button {
-  background-color: #333;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  width: 100%;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s;
-}
-
-.view-payroll-button:hover {
-  background-color: #555;
 }
 
 .loading-message,

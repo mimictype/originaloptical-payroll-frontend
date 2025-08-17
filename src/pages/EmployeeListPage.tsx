@@ -81,14 +81,10 @@ const EmployeeListPage = () => {
               className="employee-card"
               onClick={() => handleEmployeeSelect(employee)}
             >
-              <div className="employee-id">{employee.employee_id}</div>
-              <div className="employee-name">{employee.name}</div>
-              <div className="employee-email">{employee.user_email}</div>
-              <div className="employee-bank">
-                <span>{employee.bank_name}</span>
-                <span className="account-number">{employee.bank_account}</span>
+              <div className="employee-info">
+                <div className="employee-id">{employee.employee_id}</div>
+                <div className="employee-name">{employee.name}</div>
               </div>
-              <button className="view-payroll-button">明細を見る</button>
             </div>
           ))}
         </div>
