@@ -18,6 +18,9 @@ const TopPage = () => {
         <Link to="/payroll-query" className="button-block">
           薪資發放明細査詢
         </Link>
+        <Link to="/employee-management" className="button-block">
+          員工管理
+        </Link>
       </div>
     </div>
   );
