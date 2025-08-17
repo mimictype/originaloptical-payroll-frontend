@@ -56,13 +56,13 @@ const EmployeeListPage = () => {
   return (
     <div className="employee-list-page">
       <div className="page-header">
-        <h2>薪資記錄列表</h2>
         <button 
           className="back-to-top"
           onClick={() => navigate('/')}
         >
-          ← トップページに戻る
+          ← 首頁
         </button>
+        <h2>薪資發放明細査詢</h2>
       </div>
       
       {/* 年月選擇器 */}
