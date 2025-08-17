@@ -126,37 +126,66 @@ const EmployeeManagementDetailPage = () => {
         <button className="back-to-top" onClick={() => navigate('/employee-management')}>← 員工管理</button>
         <h2>員工詳細</h2>
       </div>
-      <form className="employee-form" onSubmit={e => e.preventDefault()}>
-        <label>
-          員工ID
-    <input name="employee_id" value={employee.employee_id || ''} onChange={handleChange} />
-        </label>
-        <label>
-          氏名
-          <input name="name" value={employee.name || ''} onChange={handleChange} />
-        </label>
-        <label>
-          メール
-          <input name="user_email" value={employee.user_email || ''} onChange={handleChange} />
-        </label>
-        <label>
-          銀行名
-          <input name="bank_name" value={employee.bank_name || ''} onChange={handleChange} />
-        </label>
-        <label>
-          銀行口座
-          <input name="bank_account" value={employee.bank_account || ''} onChange={handleChange} />
-        </label>
-        <div className="form-actions">
+      <form className="employee-form detail-form" onSubmit={e => e.preventDefault()}>
+        <div className="detail-fields">
+          <div className="detail-field-row">
+            <label htmlFor="employee_id">員工ID</label>
+            <div className="detail-value">
+              {mode === 'create' ? (
+                <input id="employee_id" name="employee_id" value={employee.employee_id || ''} onChange={handleChange} />
+              ) : (
+                <span>{employee.employee_id}</span>
+              )}
+            </div>
+          </div>
+          <div className="detail-field-row">
+            <label htmlFor="name">姓名</label>
+            <div className="detail-value">
+              <input id="name" name="name" value={employee.name || ''} onChange={handleChange} />
+            </div>
+          </div>
+          <div className="detail-field-row">
+            <label htmlFor="user_email">Email</label>
+            <div className="detail-value">
+              <input id="user_email" name="user_email" value={employee.user_email || ''} onChange={handleChange} />
+            </div>
+          </div>
+          <div className="detail-field-row">
+            <label htmlFor="bank_name">銀行</label>
+            <div className="detail-value">
+              <input id="bank_name" name="bank_name" value={employee.bank_name || ''} onChange={handleChange} />
+            </div>
+          </div>
+          <div className="detail-field-row">
+            <label htmlFor="bank_account">帳號</label>
+            <div className="detail-value">
+              <input id="bank_account" name="bank_account" value={employee.bank_account || ''} onChange={handleChange} />
+            </div>
+          </div>
+        </div>
+        <div className="form-actions detail-actions">
           {mode === 'create' ? (
             <button type="button" onClick={handleCreate} disabled={loading}>作成</button>
           ) : (
             <>
               <button type="button" onClick={handleUpdate} disabled={loading}>更新</button>
-              <button type="button" onClick={handleDelete} disabled={loading}>削除</button>
             </>
           )}
         </div>
+        {mode === 'edit' && (
+          <div className="delete-action-center">
+            <button
+              type="button"
+              className="delete-btn"
+              onClick={() => {
+                if (window.confirm('確定要刪除嗎？此操作無法復原。')) {
+                  handleDelete();
+                }
+              }}
+              disabled={loading}
+            >削除</button>
+          </div>
+        )}
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
       </form>
