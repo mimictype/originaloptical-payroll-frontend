@@ -13,14 +13,11 @@ const TopPage = () => {
 
   return (
     <div className="top-page">
-      <h1>Original Optical 薪資管理系統</h1>
+      <h1>Original Optical 人資管理系統</h1>
       <div className="top-page-content">
-        <p>薪資管理システムへようこそ</p>
-        <div className="button-container">
-          <Link to="/payroll-query" className="main-button">
-            薪資發放明細査詢
-          </Link>
-        </div>
+        <Link to="/payroll-query" className="button-block">
+          薪資發放明細査詢
+        </Link>
       </div>
     </div>
   );

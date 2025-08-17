@@ -237,9 +237,11 @@
 
 .top-page-content {
   background-color: white;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
   padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .top-page-content p {
@@ -248,8 +250,22 @@
   color: #555;
 }
 
-.button-container {
+.button-block {
+  display: block;
+  width: 100%;
+  background-color: #333;
+  color: white;
+  text-decoration: none;
+  padding: 20px;
+  font-size: 18px;
+  transition: background-color 0.3s, transform 0.2s;
   margin-top: 30px;
+  border-radius: 6px;
+}
+
+.button-block:hover {
+  background-color: #555;
+  transform: translateY(-2px);
 }
 
 .salary-details,
