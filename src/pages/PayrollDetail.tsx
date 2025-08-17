@@ -167,7 +167,7 @@ const PayrollDetail = () => {
       <div className="payroll-section">
         <h4 className="section-title">基本情報</h4>
         <div className="basic-info">
-          <div className="info-section">
+          <div className="payroll-section">
             <table className="payroll-table">
               <tbody>
                 <tr>
