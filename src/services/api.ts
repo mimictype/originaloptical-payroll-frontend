@@ -1,23 +1,32 @@
 // API服務的實現
 import type { Record } from '../types';
 import type { Employee, EmployeeListResponse } from '../types/employee';
+import { getCache, setCache } from '../utils/cache';
 
-// 西暦から民国年への変換
-export const convertToROCYear = (westernYear: number): number => {
-  return westernYear - 1911;
-};
-
-// 民国年から西暦への変換
-export const convertToWesternYear = (rocYear: number): number => {
-  return rocYear + 1911;
-};
 
 // API URL
 const API_URL = 'https://script.google.com/macros/s/AKfycby2fCuLqOpK4FQBixl2Wl9aD4cwtSfRXYo66qHUgjKiPegnrgNYztYSabB9b17yPhU1eA/exec';
 
+// Cache keys
+export const CACHE_KEYS = {
+  EMPLOYEES: 'employees',
+  RECORDS: (year: number, month: number) => `records_${year}_${month}`,
+  PAYROLL: (employeeId: string, year: number, month: number) => `payroll_${employeeId}_${year}_${month}`,
+};
+
 // 従業員一覧を取得する関数
-export const fetchEmployees = async (): Promise<Employee[]> => {
+export const fetchEmployees = async (useCache = true): Promise<Employee[]> => {
   try {
+    // Check cache first if useCache is true
+    if (useCache) {
+      const cachedData = getCache<Employee[]>(CACHE_KEYS.EMPLOYEES);
+      if (cachedData) {
+        console.log('Using cached employee data');
+        return cachedData;
+      }
+    }
+    
+    console.log('Fetching employees from API');
     const response = await fetch(`${API_URL}?action=listEmployees`, {
       method: 'GET',
       headers: {
@@ -35,6 +44,9 @@ export const fetchEmployees = async (): Promise<Employee[]> => {
       throw new Error('Failed to fetch employees');
     }
     
+    // Store in cache
+    setCache(CACHE_KEYS.EMPLOYEES, data.data);
+    
     return data.data;
   } catch (error) {
     console.error('従業員一覧の取得に失敗しました', error);
@@ -43,15 +55,26 @@ export const fetchEmployees = async (): Promise<Employee[]> => {
 };
 
 // 指定月の給与明細一覧を取得する関数（複数社員）
-export const fetchRecords = async (rocYear?: number, month?: number): Promise<Record[]> => {
+export const fetchRecords = async (rocYear?: number, month?: number, useCache = true): Promise<Record[]> => {
   try {
     if (!rocYear || !month) {
       throw new Error('年月を指定してください');
     }
     
+    // Check cache first if useCache is true
+    if (useCache) {
+      const cacheKey = CACHE_KEYS.RECORDS(rocYear, month);
+      const cachedData = getCache<Record[]>(cacheKey);
+      if (cachedData) {
+        console.log(`Using cached records data for ${rocYear}年${month}月`);
+        return cachedData;
+      }
+    }
+    
     // 月は2桁にパディング
     const monthStr = month.toString().padStart(2, '0');
     
+    console.log(`Fetching records from API for ${rocYear}年${month}月`);
     // APIコール (民国年を使用)
     const response = await fetch(`${API_URL}?action=listRecords&year=${rocYear}&month=${monthStr}`, {
       method: 'GET',
@@ -70,6 +93,10 @@ export const fetchRecords = async (rocYear?: number, month?: number): Promise<Re
       throw new Error('Failed to fetch records');
     }
     
+    // Store in cache
+    const cacheKey = CACHE_KEYS.RECORDS(rocYear, month);
+    setCache(cacheKey, data.data);
+    
     // APIレスポンスはすでに民国年形式なので変換不要
     return data.data;
   } catch (error) {
@@ -79,11 +106,22 @@ export const fetchRecords = async (rocYear?: number, month?: number): Promise<Re
 };
 
 // 特定従業員の給与明細を取得する関数
-export const fetchEmployeePayroll = async (employeeId: string, year: number, month: number): Promise<Record> => {
-  try {    
+export const fetchEmployeePayroll = async (employeeId: string, year: number, month: number, useCache = true): Promise<Record> => {
+  try {
+    // Check cache first if useCache is true
+    if (useCache) {
+      const cacheKey = CACHE_KEYS.PAYROLL(employeeId, year, month);
+      const cachedData = getCache<Record>(cacheKey);
+      if (cachedData) {
+        console.log(`Using cached payroll data for ${employeeId} ${year}年${month}月`);
+        return cachedData;
+      }
+    }
+    
     // 月は2桁にパディング
     const monthStr = month.toString().padStart(2, '0');
     
+    console.log(`Fetching payroll from API for ${employeeId} ${year}年${month}月`);
     // API呼び出し - 従業員ID_YYMM形式 (民国年を使用)
     const response = await fetch(`${API_URL}?action=getPayroll&id=${employeeId}_${year}${monthStr}`, {
       method: 'GET',
@@ -114,6 +152,10 @@ export const fetchEmployeePayroll = async (employeeId: string, year: number, mon
       const day = payDateStr.substring(5, 7);
       record.pay_date = `${year}-${month}-${day}`;
     }
+    
+    // Store in cache
+    const cacheKey = CACHE_KEYS.PAYROLL(employeeId, year, month);
+    setCache(cacheKey, record);
     
     return record;
   } catch (error) {

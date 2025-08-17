@@ -1,13 +1,21 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 import './components/styles.css'
-import EmployeeList from './components/EmployeeList'
+import TopPage from './pages/TopPage'
+import EmployeeListPage from './pages/EmployeeListPage'
+import PayrollDetail from './pages/PayrollDetail'
 
 function App() {
   return (
-    <div className="container">
-      <h1>Original Optical 薪資管理系統</h1>
-      <EmployeeList />
-    </div>
+    <Router>
+      <div className="container">
+        <Routes>
+          <Route path="/" element={<TopPage />} />
+          <Route path="/employees" element={<EmployeeListPage />} />
+          <Route path="/payroll/:employeeId/:year/:month" element={<PayrollDetail />} />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 
