@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchEmployeePayroll, fetchEmployeeLeave } from '../services/api';
+import { fetchEmployeePayroll, fetchEmployeeLeave, fetchEmployees, CACHE_KEYS } from '../services/api';
+import { getCache } from '../utils/cache';
 import type { Record, LeaveDetail } from '../types';
+import type { Employee } from '../types/employee';
 import './pageStyles.css';
 
 const PayrollDetail = () => {
@@ -16,6 +18,15 @@ const PayrollDetail = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // キャッシュから従業員基本情報を取得する関数
+  const getEmployeeFromCache = (employeeId: string): Employee | null => {
+    const cachedEmployees = getCache<Employee[]>(CACHE_KEYS.EMPLOYEES);
+    if (cachedEmployees) {
+      return cachedEmployees.find(emp => emp.employee_id === employeeId) || null;
+    }
+    return null;
+  };
+
   useEffect(() => {
     const getPayrollDetail = async () => {
       if (!employeeId || !year || !month) {
@@ -29,6 +40,9 @@ const PayrollDetail = () => {
         const yearNum = parseInt(year, 10);
         const monthNum = parseInt(month, 10);
         
+        // キャッシュから従業員の基本情報を取得（あれば）
+        const cachedEmployee = getEmployeeFromCache(employeeId);
+        
         // 給与明細と休暇明細を並行して取得
         const [payrollData, leaveData] = await Promise.allSettled([
           fetchEmployeePayroll(employeeId, yearNum, monthNum, true),
@@ -37,7 +51,24 @@ const PayrollDetail = () => {
         
         // 給与明細の処理
         if (payrollData.status === 'fulfilled') {
-          setRecord(payrollData.value);
+          // もしキャッシュから基本情報が取得できた場合、APIから返された給与明細にマージ
+          let payrollRecord = payrollData.value;
+          
+          // キャッシュに従業員の基本情報があれば、そのデータで上書き
+          if (cachedEmployee) {
+            console.log('Using cached employee data for basic info');
+            // 基本情報をキャッシュから補完（nameやemailなど）
+            payrollRecord = {
+              ...payrollRecord,
+              employee_id: cachedEmployee.employee_id,
+              name: payrollRecord.name || cachedEmployee.name,
+              user_email: payrollRecord.user_email || cachedEmployee.user_email,
+              bank_name: payrollRecord.bank_name || cachedEmployee.bank_name,
+              bank_account: payrollRecord.bank_account || cachedEmployee.bank_account.toString()
+            };
+          }
+          
+          setRecord(payrollRecord);
         } else {
           console.error('給与明細の取得に失敗しました', payrollData.reason);
           throw new Error('給与明細の取得に失敗しました');
@@ -157,12 +188,6 @@ const PayrollDetail = () => {
       <div className="payroll-section">
         <h4 className="section-title">固定薪資結構</h4>
         <table className="payroll-table">
-          <thead>
-            <tr>
-              <th>項目</th>
-              <th>金額</th>
-            </tr>
-          </thead>
           <tbody>
             <tr>
               <td>底薪</td>
@@ -206,12 +231,6 @@ const PayrollDetail = () => {
       <div className="payroll-section">
         <h4 className="section-title">非固定支付項目</h4>
         <table className="payroll-table">
-          <thead>
-            <tr>
-              <th>項目</th>
-              <th>金額</th>
-            </tr>
-          </thead>
           <tbody>
             <tr>
               <td>平日加班費</td>
@@ -271,12 +290,6 @@ const PayrollDetail = () => {
       <div className="payroll-section">
         <h4 className="section-title">應代扣項目</h4>
         <table className="payroll-table">
-          <thead>
-            <tr>
-              <th>項目</th>
-              <th>金額</th>
-            </tr>
-          </thead>
           <tbody>
             <tr>
               <td>勞保費</td>
@@ -348,18 +361,21 @@ const PayrollDetail = () => {
       {/* 休暇明細 セクション */}
       {leaveDetail && (
         <div className="payroll-section">
-          <h4 className="section-title">休暇明細</h4>
+          <h4 className="section-title">休假明細</h4>
           <div className="leave-details">
+            {/* 特別休暇セクション */}
             <div className="leave-section">
-              <h5>休暇日数</h5>
+              <h5>特別休假</h5>
               <table className="payroll-table">
-                <thead>
-                  <tr>
-                    <th>項目</th>
-                    <th>日数</th>
-                  </tr>
-                </thead>
                 <tbody>
+                  <tr>
+                    <td>請休期間開始</td>
+                    <td>{formatDate(leaveDetail.leave_start)}</td>
+                  </tr>
+                  <tr>
+                    <td>請休期間結束</td>
+                    <td>{formatDate(leaveDetail.leave_end)}</td>
+                  </tr>
                   <tr>
                     <td>經過遞延的特別休假日數</td>
                     <td>{leaveDetail.carryover_days}日</td>
@@ -376,72 +392,45 @@ const PayrollDetail = () => {
                     <td><strong>今年未休的特別休假日數</strong></td>
                     <td><strong>{leaveDetail.remaining_days}日</strong></td>
                   </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="leave-section">
-              <h5>代休時間</h5>
-              <table className="payroll-table">
-                <thead>
-                  <tr>
-                    <th>項目</th>
-                    <th>時間</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>至上月底止休未補休時數</td>
-                    <td>{leaveDetail.carryover_hours}時間</td>
-                  </tr>
-                  <tr>
-                    <td>本月選擇補休時數</td>
-                    <td>{leaveDetail.granted_hours}時間</td>
-                  </tr>
-                  <tr>
-                    <td>本月已補休時數</td>
-                    <td>{leaveDetail.used_hours}時間</td>
-                  </tr>
-                  <tr>
-                    <td>屆期未休補折發工資時數</td>
-                    <td>{leaveDetail.cashout_hours}時間</td>
-                  </tr>
-                  <tr className="subtotal">
-                    <td><strong>至本月止休未休補休時數</strong></td>
-                    <td><strong>{leaveDetail.remaining_hours}時間</strong></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="leave-section">
-              <h5>期間・予定</h5>
-              <table className="payroll-table">
-                <thead>
-                  <tr>
-                    <th>項目</th>
-                    <th>内容</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>請休期間開始</td>
-                    <td>{formatDate(leaveDetail.leave_start)}</td>
-                  </tr>
-                  <tr>
-                    <td>請休期間結束</td>
-                    <td>{formatDate(leaveDetail.leave_end)}</td>
-                  </tr>
-                  <tr>
-                    <td>勞雇雙方的定之補休期限</td>
-                    <td>{formatDate(leaveDetail.comp_expiry)}</td>
-                  </tr>
                   {leaveDetail.thismonth_leave_days && (
                     <tr>
                       <td>今月特別休假的請休日</td>
                       <td>{leaveDetail.thismonth_leave_days}</td>
                     </tr>
                   )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 代休セクション */}
+            <div className="leave-section">
+              <h5>加班補休</h5>
+              <table className="payroll-table">
+                <tbody>
+                  <tr>
+                    <td>勞雇雙方的定之補休期限</td>
+                    <td>{formatDate(leaveDetail.comp_expiry)}</td>
+                  </tr>
+                  <tr>
+                    <td>至上月底止休未補休時數（I）</td>
+                    <td>{leaveDetail.carryover_hours}時間</td>
+                  </tr>
+                  <tr>
+                    <td>本月選擇補休時數（II）</td>
+                    <td>{leaveDetail.granted_hours}時間</td>
+                  </tr>
+                  <tr>
+                    <td>本月已補休時數（III）</td>
+                    <td>{leaveDetail.used_hours}時間</td>
+                  </tr>
+                  <tr>
+                    <td>屆期未休補折發工資時數（IV）</td>
+                    <td>{leaveDetail.cashout_hours}時間</td>
+                  </tr>
+                  <tr className="subtotal">
+                    <td><strong>至本月止休未休補休時數（I+II-III-IV）</strong></td>
+                    <td><strong>{leaveDetail.remaining_hours}時間</strong></td>
+                  </tr>
                 </tbody>
               </table>
             </div>
