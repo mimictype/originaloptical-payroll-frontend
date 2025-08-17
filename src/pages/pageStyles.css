@@ -80,7 +80,7 @@
 }
 
 .view-payroll-button {
-  background-color: #4CAF50;
+  background-color: #333;
   color: white;
   border: none;
   padding: 8px 12px;
@@ -92,7 +92,7 @@
 }
 
 .view-payroll-button:hover {
-  background-color: #45a049;
+  background-color: #555;
 }
 
 .loading-message,
@@ -104,7 +104,7 @@
 }
 
 .error-message {
-  color: #d32f2f;
+  color: #666;
 }
 
 /* 明細詳細ページのスタイル */
@@ -114,11 +114,72 @@
   padding: 20px;
 }
 
+.payroll-section {
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 15px;
+  background-color: #fff;
+}
+
+.section-title {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 8px;
+}
+
+.payroll-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payroll-table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.payroll-table tr:last-child td {
+  border-bottom: none;
+}
+
+.payroll-table .subtotal {
+  background-color: #f5f5f5;
+  border-top: 1px solid #ddd;
+}
+
+.payroll-table .total {
+  background-color: #eee;
+  font-weight: bold;
+}
+
+/* トップページのスタイル */
 .navigation-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
   margin-bottom: 30px;
-  gap: 20px;
+  gap: 10px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.navigation-header h1 {
+  margin: 10px 0 0 0;
+  color: #333;
+}
+
+.navigation-header h2 {
+  margin: 0;
+  color: #444;
+}
+
+.navigation-header .back-button {
+  align-self: flex-start;
 }
 
 .back-button {
@@ -137,7 +198,22 @@
   background-color: #e0e0e0;
 }
 
-/* トップページのスタイル */
+.main-button {
+  display: inline-block;
+  background-color: #333;
+  color: white;
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-size: 18px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.main-button:hover {
+  background-color: #555;
+  transform: translateY(-2px);
+}
+
 .top-page {
   max-width: 800px;
   margin: 0 auto;
@@ -153,7 +229,7 @@
 .top-page-content {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
   padding: 40px;
 }
 
@@ -167,42 +243,22 @@
   margin-top: 30px;
 }
 
-.main-button {
-  display: inline-block;
-  background-color: #4CAF50;
-  color: white;
-  text-decoration: none;
-  padding: 12px 24px;
-  border-radius: 4px;
-  font-size: 18px;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-.main-button:hover {
-  background-color: #45a049;
-  transform: translateY(-2px);
-}
-
-.error-container {
-  text-align: center;
-  margin: 40px auto;
-  max-width: 600px;
-}
-
-/* 休暇明細セクションのスタイル */
+.salary-details,
 .leave-details {
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
 }
 
+.salary-section,
 .leave-section {
   background-color: #f9f9f9;
   padding: 15px;
   border-radius: 6px;
-  border-left: 4px solid #4CAF50;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.salary-section h5,
 .leave-section h5 {
   margin: 0 0 15px 0;
   color: #333;
@@ -210,18 +266,55 @@
   font-weight: bold;
 }
 
+.salary-section .payroll-table,
 .leave-section .payroll-table {
   margin: 0;
   background-color: white;
 }
 
+.salary-section.total-section {
+  grid-column: 1 / -1;
+  background-color: #f2f2f2;
+  border-bottom: 1px solid #ddd;
+}
+
+.salary-section.total-section .total {
+  font-size: 1.1em;
+  color: #333;
+}
+
 /* レスポンシブ対応 */
 @media (min-width: 768px) {
+  .salary-details,
   .leave-details {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .leave-section:last-child {
+  .salary-details .salary-section:last-child,
+  .leave-details .leave-section:last-child {
     grid-column: 1 / -1;
   }
+}
+
+/* 基本情報のスタイル */
+.basic-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item .label {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.info-item .value {
+  font-size: 16px;
+  color: #333;
 }
