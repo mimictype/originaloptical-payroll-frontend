@@ -2,8 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 import './components/styles.css'
 import TopPage from './pages/TopPage'
-import EmployeeListPage from './pages/EmployeeListPage'
-import PayrollDetail from './pages/PayrollDetail'
+import PayrollQueryPage from './pages/PayrollQueryPage'
+import PayrollDetailPage from './pages/PayrollDetailPage'
 
 function App() {
   return (
@@ -11,8 +11,8 @@ function App() {
       <div className="container">
         <Routes>
           <Route path="/" element={<TopPage />} />
-          <Route path="/employees" element={<EmployeeListPage />} />
-          <Route path="/payroll/:employeeId/:year/:month" element={<PayrollDetail />} />
+          <Route path="/payroll-query" element={<PayrollQueryPage />} />
+          <Route path="/payroll/:employeeId/:year/:month" element={<PayrollDetailPage />} />
         </Routes>
       </div>
     </Router>

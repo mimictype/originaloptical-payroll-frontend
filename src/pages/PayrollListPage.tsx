@@ -6,7 +6,7 @@ import DateSelector from '../components/DateSelector';
 import '../components/employeeStyles.css';
 import './pageStyles.css';
 
-const EmployeeListPage = () => {
+const PayrollListPage = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,4 +99,4 @@ const EmployeeListPage = () => {
   );
 };
 
-export default EmployeeListPage;
+export default PayrollListPage;

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchEmployeePayroll, fetchEmployeeLeave, fetchEmployees, CACHE_KEYS } from '../services/api';
+import { fetchEmployeePayroll, fetchEmployeeLeave, CACHE_KEYS } from '../services/api';
 import { getCache } from '../utils/cache';
 import type { Record, LeaveDetail } from '../types';
 import type { Employee } from '../types/employee';
 import './pageStyles.css';
 
-const PayrollDetail = () => {
+const PayrollDetailPage = () => {
   const { employeeId, year, month } = useParams<{
     employeeId: string;
     year: string;
@@ -135,8 +135,8 @@ const PayrollDetail = () => {
     return (
       <div className="error-container">
         <div className="error">{error}</div>
-        <Link to="/employees" className="back-button">
-          ← 員工列表
+        <Link to="/payroll-query" className="back-button">
+          ← 薪資發放明細査詢
         </Link>
       </div>
     );
@@ -146,8 +146,8 @@ const PayrollDetail = () => {
     return (
       <div className="error-container">
         <div className="error">給与明細が見つかりませんでした</div>
-        <Link to="/employees" className="back-button">
-          ← 員工列表
+        <Link to="/payroll-query" className="back-button">
+          ← 薪資發放明細査詢
         </Link>
       </div>
     );
@@ -156,8 +156,8 @@ const PayrollDetail = () => {
   return (
     <div className="payroll-detail-page">
       <div className="navigation-header">
-        <Link to="/employees" className="back-button">
-          ← 員工列表
+        <Link to="/payroll-query" className="back-button">
+          ← 薪資發放明細査詢
         </Link>
         <h1>傑夫眼鏡行</h1>
         <h2>{formatPayrollDate(record.pay_date)}薪資發放明細表</h2>
@@ -463,4 +463,4 @@ const PayrollDetail = () => {
   );
 };
 
-export default PayrollDetail;
+export default PayrollDetailPage;

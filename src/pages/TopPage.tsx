@@ -17,8 +17,8 @@ const TopPage = () => {
       <div className="top-page-content">
         <p>薪資管理システムへようこそ</p>
         <div className="button-container">
-          <Link to="/employees" className="main-button">
-            全明細閲覧ページへ
+          <Link to="/payroll-query" className="main-button">
+            薪資發放明細査詢
           </Link>
         </div>
       </div>
