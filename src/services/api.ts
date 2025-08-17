@@ -1,17 +1,18 @@
 // API服務的實現
-import type { Record } from '../types';
+import type { Record, LeaveDetail } from '../types';
 import type { Employee, EmployeeListResponse } from '../types/employee';
 import { getCache, setCache } from '../utils/cache';
 
 
 // API URL
-const API_URL = 'https://script.google.com/macros/s/AKfycby2fCuLqOpK4FQBixl2Wl9aD4cwtSfRXYo66qHUgjKiPegnrgNYztYSabB9b17yPhU1eA/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwExWStOE2YXxF-zxcmNV452I1FaiJU4MrHarF7DTm3dX865jeOKkP1krtxN-OK9IEQRQ/exec';
 
 // Cache keys
 export const CACHE_KEYS = {
   EMPLOYEES: 'employees',
   RECORDS: (year: number, month: number) => `records_${year}_${month}`,
   PAYROLL: (employeeId: string, year: number, month: number) => `payroll_${employeeId}_${year}_${month}`,
+  LEAVE_DETAILS: (employeeId: string, year: number, month: number) => `leave_${employeeId}_${year}_${month}`,
 };
 
 // 従業員一覧を取得する関数
@@ -160,6 +161,55 @@ export const fetchEmployeePayroll = async (employeeId: string, year: number, mon
     return record;
   } catch (error) {
     console.error(`従業員${employeeId}の給与明細取得に失敗しました`, error);
+    throw error;
+  }
+};
+
+// 特定従業員の休暇明細を取得する関数
+export const fetchEmployeeLeave = async (employeeId: string, year: number, month: number, useCache = true): Promise<LeaveDetail> => {
+  try {
+    // Check cache first if useCache is true
+    if (useCache) {
+      const cacheKey = CACHE_KEYS.LEAVE_DETAILS(employeeId, year, month);
+      const cachedData = getCache<LeaveDetail>(cacheKey);
+      if (cachedData) {
+        console.log(`Using cached leave data for ${employeeId} ${year}年${month}月`);
+        return cachedData;
+      }
+    }
+    
+    // 月は2桁にパディング
+    const monthStr = month.toString().padStart(2, '0');
+    
+    console.log(`Fetching leave from API for ${employeeId} ${year}年${month}月`);
+    // API呼び出し - 従業員ID_YYMM形式 (民国年を使用)
+    const response = await fetch(`${API_URL}?action=getleave&id=${employeeId}_${year}${monthStr}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.status !== 'success') {
+      throw new Error(`Failed to fetch leave for employee ${employeeId}`);
+    }
+    
+    // APIレスポンスでは "record" キーにデータが格納されている
+    const leaveRecord = data.record;
+    
+    // Store in cache
+    const cacheKey = CACHE_KEYS.LEAVE_DETAILS(employeeId, year, month);
+    setCache(cacheKey, leaveRecord);
+    
+    return leaveRecord;
+  } catch (error) {
+    console.error(`従業員${employeeId}の休暇明細取得に失敗しました`, error);
     throw error;
   }
 };

@@ -188,3 +188,40 @@
   margin: 40px auto;
   max-width: 600px;
 }
+
+/* 休暇明細セクションのスタイル */
+.leave-details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.leave-section {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  border-left: 4px solid #4CAF50;
+}
+
+.leave-section h5 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.leave-section .payroll-table {
+  margin: 0;
+  background-color: white;
+}
+
+/* レスポンシブ対応 */
+@media (min-width: 768px) {
+  .leave-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .leave-section:last-child {
+    grid-column: 1 / -1;
+  }
+}

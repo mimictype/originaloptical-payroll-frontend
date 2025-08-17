@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchEmployeePayroll } from '../services/api';
-import type { Record } from '../types';
+import { fetchEmployeePayroll, fetchEmployeeLeave } from '../services/api';
+import type { Record, LeaveDetail } from '../types';
 import './pageStyles.css';
 
 const PayrollDetail = () => {
@@ -12,6 +12,7 @@ const PayrollDetail = () => {
   }>();
 
   const [record, setRecord] = useState<Record | null>(null);
+  const [leaveDetail, setLeaveDetail] = useState<LeaveDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,13 +28,33 @@ const PayrollDetail = () => {
         setLoading(true);
         const yearNum = parseInt(year, 10);
         const monthNum = parseInt(month, 10);
-        // useCache=true to use cached data if available
-        const data = await fetchEmployeePayroll(employeeId, yearNum, monthNum, true);
-        setRecord(data);
+        
+        // 給与明細と休暇明細を並行して取得
+        const [payrollData, leaveData] = await Promise.allSettled([
+          fetchEmployeePayroll(employeeId, yearNum, monthNum, true),
+          fetchEmployeeLeave(employeeId, yearNum, monthNum, true)
+        ]);
+        
+        // 給与明細の処理
+        if (payrollData.status === 'fulfilled') {
+          setRecord(payrollData.value);
+        } else {
+          console.error('給与明細の取得に失敗しました', payrollData.reason);
+          throw new Error('給与明細の取得に失敗しました');
+        }
+        
+        // 休暇明細の処理（失敗してもエラーにしない）
+        if (leaveData.status === 'fulfilled') {
+          setLeaveDetail(leaveData.value);
+        } else {
+          console.warn('休暇明細の取得に失敗しました', leaveData.reason);
+          setLeaveDetail(null);
+        }
+        
         setError(null);
       } catch (err) {
-        console.error('給与明細の取得に失敗しました', err);
-        setError('給与明細の取得に失敗しました。再読み込みをお試しください。');
+        console.error('データの取得に失敗しました', err);
+        setError('データの取得に失敗しました。再読み込みをお試しください。');
       } finally {
         setLoading(false);
       }
@@ -48,6 +69,18 @@ const PayrollDetail = () => {
       currency: 'TWD',
       minimumFractionDigits: 0
     }).format(amount);
+  };
+
+  const formatDate = (dateNum: number) => {
+    const dateStr = dateNum.toString();
+    if (dateStr.length === 7) {
+      // Format: YYYMMDD (民国年)
+      const year = dateStr.substring(0, 3);
+      const month = dateStr.substring(3, 5);
+      const day = dateStr.substring(5, 7);
+      return `${year}-${month}-${day}`;
+    }
+    return dateStr;
   };
 
   const calculateTotal = (record: Record) => {
@@ -311,6 +344,110 @@ const PayrollDetail = () => {
           </tbody>
         </table>
       </div>
+
+      {/* 休暇明細 セクション */}
+      {leaveDetail && (
+        <div className="payroll-section">
+          <h4 className="section-title">休暇明細</h4>
+          <div className="leave-details">
+            <div className="leave-section">
+              <h5>休暇日数</h5>
+              <table className="payroll-table">
+                <thead>
+                  <tr>
+                    <th>項目</th>
+                    <th>日数</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>經過遞延的特別休假日數</td>
+                    <td>{leaveDetail.carryover_days}日</td>
+                  </tr>
+                  <tr>
+                    <td>今年可休的特別休假日數</td>
+                    <td>{leaveDetail.granted_days}日</td>
+                  </tr>
+                  <tr>
+                    <td>今年已休的特別休假日數</td>
+                    <td>{leaveDetail.used_days}日</td>
+                  </tr>
+                  <tr className="subtotal">
+                    <td><strong>今年未休的特別休假日數</strong></td>
+                    <td><strong>{leaveDetail.remaining_days}日</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="leave-section">
+              <h5>代休時間</h5>
+              <table className="payroll-table">
+                <thead>
+                  <tr>
+                    <th>項目</th>
+                    <th>時間</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>至上月底止休未補休時數</td>
+                    <td>{leaveDetail.carryover_hours}時間</td>
+                  </tr>
+                  <tr>
+                    <td>本月選擇補休時數</td>
+                    <td>{leaveDetail.granted_hours}時間</td>
+                  </tr>
+                  <tr>
+                    <td>本月已補休時數</td>
+                    <td>{leaveDetail.used_hours}時間</td>
+                  </tr>
+                  <tr>
+                    <td>屆期未休補折發工資時數</td>
+                    <td>{leaveDetail.cashout_hours}時間</td>
+                  </tr>
+                  <tr className="subtotal">
+                    <td><strong>至本月止休未休補休時數</strong></td>
+                    <td><strong>{leaveDetail.remaining_hours}時間</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="leave-section">
+              <h5>期間・予定</h5>
+              <table className="payroll-table">
+                <thead>
+                  <tr>
+                    <th>項目</th>
+                    <th>内容</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>請休期間開始</td>
+                    <td>{formatDate(leaveDetail.leave_start)}</td>
+                  </tr>
+                  <tr>
+                    <td>請休期間結束</td>
+                    <td>{formatDate(leaveDetail.leave_end)}</td>
+                  </tr>
+                  <tr>
+                    <td>勞雇雙方的定之補休期限</td>
+                    <td>{formatDate(leaveDetail.comp_expiry)}</td>
+                  </tr>
+                  {leaveDetail.thismonth_leave_days && (
+                    <tr>
+                      <td>今月特別休假的請休日</td>
+                      <td>{leaveDetail.thismonth_leave_days}</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
