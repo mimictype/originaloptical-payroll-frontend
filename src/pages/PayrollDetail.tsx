@@ -167,29 +167,35 @@ const PayrollDetail = () => {
       <div className="payroll-section">
         <h4 className="section-title">基本情報</h4>
         <div className="basic-info">
-          <div className="info-item">
-            <span className="label">員工ID：</span>
-            <span className="value">{record.employee_id}</span>
-          </div>
-          <div className="info-item">
-            <span className="label">姓名：</span>
-            <span className="value">{record.name}</span>
-          </div>
-          <div className="info-item">
-            <span className="label">Email：</span>
-            <span className="value">{record.user_email}</span>
-          </div>
-          <div className="info-item">
-            <span className="label">發薪日期：</span>
-            <span className="value">{record.pay_date}</span>
-          </div>
-          <div className="info-item">
-            <span className="label">銀行：</span>
-            <span className="value">{record.bank_name}</span>
-          </div>
-          <div className="info-item">
-            <span className="label">帳號：</span>
-            <span className="value">{record.bank_account}</span>
+          <div className="info-section">
+            <table className="payroll-table">
+              <tbody>
+                <tr>
+                  <td>員工ID</td>
+                  <td>{record.employee_id}</td>
+                </tr>
+                <tr>
+                  <td>姓名</td>
+                  <td>{record.name}</td>
+                </tr>
+                <tr>
+                  <td>Email</td>
+                  <td>{record.user_email}</td>
+                </tr>
+                <tr>
+                  <td>發薪日期</td>
+                  <td>{record.pay_date}</td>
+                </tr>
+                <tr>
+                  <td>銀行</td>
+                  <td>{record.bank_name}</td>
+                </tr>
+                <tr>
+                  <td>帳號</td>
+                  <td>{record.bank_account}</td>
+                </tr>
+                </tbody>
+            </table>
           </div>
         </div>
       </div>

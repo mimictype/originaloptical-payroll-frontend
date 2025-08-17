@@ -299,22 +299,41 @@
 /* 基本情報のスタイル */
 .basic-info {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.info-section {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .info-item {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .info-item .label {
   font-size: 14px;
-  color: #777;
-  margin-bottom: 4px;
+  color: #333;
 }
 
 .info-item .value {
-  font-size: 16px;
+  font-size: 14px;
   color: #333;
+  font-weight: 500;
 }
