@@ -116,13 +116,13 @@ h2, h3 {
 .nav-button {
   background-color: #f8f8f8;
   border: 1px solid #e6e6e6;
-  color: #4a90e2;
-  font-size: 18px;
+  color: #000000;
+  font-size: 22px;
   font-weight: bold;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -527,9 +527,9 @@ button:active {
   }
   
   .nav-button {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
   }
 }
 
@@ -607,8 +607,8 @@ button:active {
   }
   
   .nav-button {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
 }
