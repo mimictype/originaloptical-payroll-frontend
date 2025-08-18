@@ -6,6 +6,7 @@ import PayrollQueryPage from './pages/PayrollQueryPage'
 import PayrollDetailPage from './pages/PayrollDetailPage'
 import EmployeeManagementPage from './pages/EmployeeManagementPage'
 import EmployeeManagementDetailPage from './pages/EmployeeManagementDetailPage'
+import PayrollManagementPage from './pages/PayrollManagementPage'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/employee-management" element={<EmployeeManagementPage />} />
           <Route path="/employee-management/create" element={<EmployeeManagementDetailPage />} />
           <Route path="/employee-management/:employee_id" element={<EmployeeManagementDetailPage />} />
+            <Route path="/payroll-management" element={<PayrollManagementPage />} />
         </Routes>
       </div>
     </Router>

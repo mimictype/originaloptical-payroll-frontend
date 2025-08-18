@@ -21,6 +21,9 @@ const TopPage = () => {
         <Link to="/employee-management" className="button-block">
           員工管理
         </Link>
+        <Link to="/payroll-management" className="button-block">
+          薪資管理
+        </Link>
       </div>
     </div>
   );
