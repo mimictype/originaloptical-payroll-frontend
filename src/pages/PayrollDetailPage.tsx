@@ -274,11 +274,11 @@ const PayrollDetailPage = () => {
               title="加班補休"
               rows={[ 
                 { label: '勞雇雙方的定之補休期限', value: formatDate(leaveDetail.comp_expiry) },
-                { label: '至上月底止休未補休時數（I）', value: `${leaveDetail.carryover_hours}時間` },
-                { label: '本月選擇補休時數（II）', value: `${leaveDetail.granted_hours}時間` },
-                { label: '本月已補休時數（III）', value: `${leaveDetail.used_hours}時間` },
-                { label: '屆期未休補折發工資時數（IV）', value: `${leaveDetail.cashout_hours}時間` },
-                { label: '至本月止休未休補休時數（I+II-III-IV）', value: `${leaveDetail.remaining_hours}時間` }
+                { label: '至上月底止休未補休時數(I)', value: `${leaveDetail.carryover_hours}小時` },
+                { label: '本月選擇補休時數(II)', value: `${leaveDetail.granted_hours}小時` },
+                { label: '本月已補休時數(III)', value: `${leaveDetail.used_hours}小時` },
+                { label: '屆期未休補折發工資時數(IV)', value: `${leaveDetail.cashout_hours}小時` },
+                { label: '至本月止休未休補休時數(I+II-III-IV)', value: `${leaveDetail.remaining_hours}小時` }
               ]}
             />
           </div>

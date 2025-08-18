@@ -235,8 +235,9 @@
 .payroll-detail-page {
   width: 100%;
   margin: 0;
-  padding: 20px;
+  padding: 0px;
   box-sizing: border-box;
+  margin-bottom: 2rem;
 }
 
 .payroll-section {
