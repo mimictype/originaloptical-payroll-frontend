@@ -263,17 +263,17 @@ const PayrollDetailPage = () => {
               rows={[ 
                 { label: '請休期間開始', value: formatDate(leaveDetail.leave_start) },
                 { label: '請休期間結束', value: formatDate(leaveDetail.leave_end) },
-                { label: '經過遞延的特別休假日數', value: `${leaveDetail.carryover_days}日` },
-                { label: '今年可休的特別休假日數', value: `${leaveDetail.granted_days}日` },
-                { label: '今年已休的特別休假日數', value: `${leaveDetail.used_days}日` },
-                { label: '今年未休的特別休假日數', value: `${leaveDetail.remaining_days}日` },
-                ...(leaveDetail.thismonth_leave_days ? [{ label: '今月特別休假的請休日', value: leaveDetail.thismonth_leave_days }] : [])
+                { label: '經過遞延日數', value: `${leaveDetail.carryover_days}日` },
+                { label: '今年可休日數', value: `${leaveDetail.granted_days}日` },
+                { label: '今年已休日數', value: `${leaveDetail.used_days}日` },
+                { label: '今年未休日數', value: `${leaveDetail.remaining_days}日` },
+                ...(leaveDetail.thismonth_leave_days ? [{ label: '今月請休日', value: leaveDetail.thismonth_leave_days }] : [])
               ]}
             />
             <SalarySection
               title="加班補休"
               rows={[ 
-                { label: '勞雇雙方的定之補休期限', value: formatDate(leaveDetail.comp_expiry) },
+                { label: '勞雇約定之補休期限', value: formatDate(leaveDetail.comp_expiry) },
                 { label: '至上月底止休未補休時數(I)', value: `${leaveDetail.carryover_hours}小時` },
                 { label: '本月選擇補休時數(II)', value: `${leaveDetail.granted_hours}小時` },
                 { label: '本月已補休時數(III)', value: `${leaveDetail.used_hours}小時` },
