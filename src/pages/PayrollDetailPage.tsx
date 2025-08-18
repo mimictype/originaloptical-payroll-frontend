@@ -5,6 +5,8 @@ import { getCache } from '../utils/cache';
 import type { Record, LeaveDetail } from '../types';
 import type { Employee } from '../types/employee';
 import './pageStyles.css';
+import SalarySection from '../components/SalarySection';
+import Section from '../components/Section';
 
 const PayrollDetailPage = () => {
   const { employeeId, year, month } = useParams<{
@@ -167,7 +169,6 @@ const PayrollDetailPage = () => {
       <div className="payroll-section">
         <h4 className="section-title">基本情報</h4>
         <div className="basic-info">
-          <div className="payroll-section">
             <table className="payroll-table">
               <tbody>
                 <tr>
@@ -194,270 +195,94 @@ const PayrollDetailPage = () => {
                   <td>帳號</td>
                   <td>{record.bank_account}</td>
                 </tr>
-                </tbody>
+              </tbody>
             </table>
-          </div>
         </div>
       </div>
 
       {/* 薪資明細 セクション */}
-      <div className="payroll-section">
-        <h4 className="section-title">薪資明細</h4>
+      <Section title="薪資明細">
         <div className="salary-details">
-          {/* 固定薪資結構 */}
-          <div className="salary-section">
-            <h5>固定薪資結構</h5>
-            <table className="payroll-table">
-              <tbody>
-                <tr>
-                  <td>底薪</td>
-                  <td>{formatCurrency(record.base_salary)}</td>
-                </tr>
-                <tr>
-                  <td>伙食津貼</td>
-                  <td>{formatCurrency(record.meal_allowance)}</td>
-                </tr>
-                
-                {record.fixed_custom1_name && (
-                  <tr>
-                    <td>{record.fixed_custom1_name}</td>
-                    <td>{formatCurrency(record.fixed_custom1_amount)}</td>
-                  </tr>
-                )}
-                
-                {record.fixed_custom2_name && (
-                  <tr>
-                    <td>{record.fixed_custom2_name}</td>
-                    <td>{formatCurrency(record.fixed_custom2_amount)}</td>
-                  </tr>
-                )}
-                
-                {record.fixed_custom3_name && (
-                  <tr>
-                    <td>{record.fixed_custom3_name}</td>
-                    <td>{formatCurrency(record.fixed_custom3_amount)}</td>
-                  </tr>
-                )}
-                
-                <tr>
-                  <td><strong>小計(A)</strong></td>
-                  <td><strong>{formatCurrency(record.subtotal_A)}</strong></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* 非固定支付項目 */}
-          <div className="salary-section">
-            <h5>非固定支付項目</h5>
-            <table className="payroll-table">
-              <tbody>
-                <tr>
-                  <td>平日加班費</td>
-                  <td>{formatCurrency(record.overtime_weekday)}</td>
-                </tr>
-                
-                <tr>
-                  <td>休假日加班費</td>
-                  <td>{formatCurrency(record.overtime_holiday)}</td>
-                </tr>
-                
-                <tr>
-                  <td>休息日加班費</td>
-                  <td>{formatCurrency(record.overtime_restday)}</td>
-                </tr>
-                
-                <tr>
-                  <td>國定假日加班費</td>
-                  <td>{formatCurrency(record.overtime_national)}</td>
-                </tr>
-                
-                <tr>
-                  <td>獎金</td>
-                  <td>{formatCurrency(record.bonus)}</td>
-                </tr>
-                
-                {record.variable_custom1_name && (
-                  <tr>
-                    <td>{record.variable_custom1_name}</td>
-                    <td>{formatCurrency(record.variable_custom1_amount)}</td>
-                  </tr>
-                )}
-                
-                {record.variable_custom2_name && (
-                  <tr>
-                    <td>{record.variable_custom2_name}</td>
-                    <td>{formatCurrency(record.variable_custom2_amount)}</td>
-                  </tr>
-                )}
-                
-                {record.variable_custom3_name && (
-                  <tr>
-                    <td>{record.variable_custom3_name}</td>
-                    <td>{formatCurrency(record.variable_custom3_amount)}</td>
-                  </tr>
-                )}
-                
-                <tr>
-                  <td><strong>小計(B)</strong></td>
-                  <td><strong>{formatCurrency(record.subtotal_B)}</strong></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* 應代扣項目 */}
-          <div className="salary-section">
-            <h5>應代扣項目</h5>
-            <table className="payroll-table">
-              <tbody>
-                <tr>
-                  <td>勞保費</td>
-                  <td>{formatCurrency(record.labor_insurance)}</td>
-                </tr>
-                
-                <tr>
-                  <td>健保費</td>
-                  <td>{formatCurrency(record.health_insurance)}</td>
-                </tr>
-                
-                <tr>
-                  <td>國保</td>
-                  <td>{formatCurrency(record.national_insurance)}</td>
-                </tr>
-                
-                <tr>
-                  <td>事假扣款</td>
-                  <td>{formatCurrency(record.absence_deduction)}</td>
-                </tr>
-                
-                <tr>
-                  <td>病假扣款</td>
-                  <td>{formatCurrency(record.sick_deduction)}</td>
-                </tr>
-                
-                {record.deduct_custom1_name && (
-                  <tr>
-                    <td>{record.deduct_custom1_name}</td>
-                    <td>{formatCurrency(record.deduct_custom1_amount)}</td>
-                  </tr>
-                )}
-                
-                {record.deduct_custom2_name && (
-                  <tr>
-                    <td>{record.deduct_custom2_name}</td>
-                    <td>{formatCurrency(record.deduct_custom2_amount)}</td>
-                  </tr>
-                )}
-                
-                {record.deduct_custom3_name && (
-                  <tr>
-                    <td>{record.deduct_custom3_name}</td>
-                    <td>{formatCurrency(record.deduct_custom3_amount)}</td>
-                  </tr>
-                )}
-                
-                <tr>
-                  <td><strong>小計(C)</strong></td>
-                  <td><strong>{formatCurrency(record.subtotal_C)}</strong></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* 合計 */}
-          <div className="salary-section">
-            <h5>合計</h5>
-            <table className="payroll-table">
-              <tbody>
-                <tr>
-                  <td><strong>總計 (A+B-C)</strong></td>
-                  <td><strong>{formatCurrency(calculateTotal(record))}</strong></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <SalarySection
+            title="固定薪資結構"
+            rows={[
+              { label: '底薪', value: formatCurrency(record.base_salary) },
+              { label: '伙食津貼', value: formatCurrency(record.meal_allowance) },
+              ...(record.fixed_custom1_name ? [{ label: record.fixed_custom1_name, value: formatCurrency(record.fixed_custom1_amount) }] : []),
+              ...(record.fixed_custom2_name ? [{ label: record.fixed_custom2_name, value: formatCurrency(record.fixed_custom2_amount) }] : []),
+              ...(record.fixed_custom3_name ? [{ label: record.fixed_custom3_name, value: formatCurrency(record.fixed_custom3_amount) }] : []),
+            ]}
+            subtotalLabel="小計(A)"
+            subtotalValue={formatCurrency(record.subtotal_A)}
+          />
+          <SalarySection
+            title="非固定支付項目"
+            rows={[
+              { label: '平日加班費', value: formatCurrency(record.overtime_weekday) },
+              { label: '休假日加班費', value: formatCurrency(record.overtime_holiday) },
+              { label: '休息日加班費', value: formatCurrency(record.overtime_restday) },
+              { label: '國定假日加班費', value: formatCurrency(record.overtime_national) },
+              { label: '獎金', value: formatCurrency(record.bonus) },
+              ...(record.variable_custom1_name ? [{ label: record.variable_custom1_name, value: formatCurrency(record.variable_custom1_amount) }] : []),
+              ...(record.variable_custom2_name ? [{ label: record.variable_custom2_name, value: formatCurrency(record.variable_custom2_amount) }] : []),
+              ...(record.variable_custom3_name ? [{ label: record.variable_custom3_name, value: formatCurrency(record.variable_custom3_amount) }] : []),
+            ]}
+            subtotalLabel="小計(B)"
+            subtotalValue={formatCurrency(record.subtotal_B)}
+          />
+          <SalarySection
+            title="應代扣項目"
+            rows={[
+              { label: '勞保費', value: formatCurrency(record.labor_insurance) },
+              { label: '健保費', value: formatCurrency(record.health_insurance) },
+              { label: '國保', value: formatCurrency(record.national_insurance) },
+              { label: '事假扣款', value: formatCurrency(record.absence_deduction) },
+              { label: '病假扣款', value: formatCurrency(record.sick_deduction) },
+              ...(record.deduct_custom1_name ? [{ label: record.deduct_custom1_name, value: formatCurrency(record.deduct_custom1_amount) }] : []),
+              ...(record.deduct_custom2_name ? [{ label: record.deduct_custom2_name, value: formatCurrency(record.deduct_custom2_amount) }] : []),
+              ...(record.deduct_custom3_name ? [{ label: record.deduct_custom3_name, value: formatCurrency(record.deduct_custom3_amount) }] : []),
+            ]}
+            subtotalLabel="小計(C)"
+            subtotalValue={formatCurrency(record.subtotal_C)}
+          />
+          <SalarySection
+            title="合計"
+            rows={[]}
+            subtotalLabel="總計 (A+B-C)"
+            subtotalValue={formatCurrency(calculateTotal(record))}
+          />
         </div>
-      </div>
+      </Section>
 
       {/* 休暇明細 セクション */}
       {leaveDetail && (
-        <div className="payroll-section">
-          <h4 className="section-title">休假明細</h4>
+        <Section title="休假明細">
           <div className="leave-details">
-            {/* 特別休暇セクション */}
-            <div className="leave-section">
-              <h5>特別休假</h5>
-              <table className="payroll-table">
-                <tbody>
-                  <tr>
-                    <td>請休期間開始</td>
-                    <td>{formatDate(leaveDetail.leave_start)}</td>
-                  </tr>
-                  <tr>
-                    <td>請休期間結束</td>
-                    <td>{formatDate(leaveDetail.leave_end)}</td>
-                  </tr>
-                  <tr>
-                    <td>經過遞延的特別休假日數</td>
-                    <td>{leaveDetail.carryover_days}日</td>
-                  </tr>
-                  <tr>
-                    <td>今年可休的特別休假日數</td>
-                    <td>{leaveDetail.granted_days}日</td>
-                  </tr>
-                  <tr>
-                    <td>今年已休的特別休假日數</td>
-                    <td>{leaveDetail.used_days}日</td>
-                  </tr>
-                  <tr>
-                    <td>今年未休的特別休假日數</td>
-                    <td>{leaveDetail.remaining_days}日</td>
-                  </tr>
-                  {leaveDetail.thismonth_leave_days && (
-                    <tr>
-                      <td>今月特別休假的請休日</td>
-                      <td>{leaveDetail.thismonth_leave_days}</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* 代休セクション */}
-            <div className="leave-section">
-              <h5>加班補休</h5>
-              <table className="payroll-table">
-                <tbody>
-                  <tr>
-                    <td>勞雇雙方的定之補休期限</td>
-                    <td>{formatDate(leaveDetail.comp_expiry)}</td>
-                  </tr>
-                  <tr>
-                    <td>至上月底止休未補休時數（I）</td>
-                    <td>{leaveDetail.carryover_hours}時間</td>
-                  </tr>
-                  <tr>
-                    <td>本月選擇補休時數（II）</td>
-                    <td>{leaveDetail.granted_hours}時間</td>
-                  </tr>
-                  <tr>
-                    <td>本月已補休時數（III）</td>
-                    <td>{leaveDetail.used_hours}時間</td>
-                  </tr>
-                  <tr>
-                    <td>屆期未休補折發工資時數（IV）</td>
-                    <td>{leaveDetail.cashout_hours}時間</td>
-                  </tr>
-                  <tr>
-                    <td>至本月止休未休補休時數（I+II-III-IV）</td>
-                    <td>{leaveDetail.remaining_hours}時間</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <SalarySection
+              title="特別休假"
+              rows={[ 
+                { label: '請休期間開始', value: formatDate(leaveDetail.leave_start) },
+                { label: '請休期間結束', value: formatDate(leaveDetail.leave_end) },
+                { label: '經過遞延的特別休假日數', value: `${leaveDetail.carryover_days}日` },
+                { label: '今年可休的特別休假日數', value: `${leaveDetail.granted_days}日` },
+                { label: '今年已休的特別休假日數', value: `${leaveDetail.used_days}日` },
+                { label: '今年未休的特別休假日數', value: `${leaveDetail.remaining_days}日` },
+                ...(leaveDetail.thismonth_leave_days ? [{ label: '今月特別休假的請休日', value: leaveDetail.thismonth_leave_days }] : [])
+              ]}
+            />
+            <SalarySection
+              title="加班補休"
+              rows={[ 
+                { label: '勞雇雙方的定之補休期限', value: formatDate(leaveDetail.comp_expiry) },
+                { label: '至上月底止休未補休時數（I）', value: `${leaveDetail.carryover_hours}時間` },
+                { label: '本月選擇補休時數（II）', value: `${leaveDetail.granted_hours}時間` },
+                { label: '本月已補休時數（III）', value: `${leaveDetail.used_hours}時間` },
+                { label: '屆期未休補折發工資時數（IV）', value: `${leaveDetail.cashout_hours}時間` },
+                { label: '至本月止休未休補休時數（I+II-III-IV）', value: `${leaveDetail.remaining_hours}時間` }
+              ]}
+            />
           </div>
-        </div>
+        </Section>
       )}
     </div>
   );

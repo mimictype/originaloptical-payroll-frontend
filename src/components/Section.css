@@ -1,0 +1,12 @@
+.payroll-section {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem 1rem;
+  margin-bottom: 2rem;
+}
+.section-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #333;
+}
