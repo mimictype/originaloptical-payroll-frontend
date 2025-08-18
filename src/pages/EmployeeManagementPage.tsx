@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchEmployees } from '../services/api';
 import { setCache } from '../utils/cache';
 import type { Employee } from '../types/employee';
-import '../components/employeeStyles.css';
+import EmployeeSelect from '../components/EmployeeSelect';
 import './pageStyles.css';
 
 const EmployeeManagementPage = () => {
@@ -60,28 +60,11 @@ const EmployeeManagementPage = () => {
       </div>
       {loading && <p className="loading-message">載入中...</p>}
       {error && <div className="error-message">{error}</div>}
-      {/* 従業員一覧 */}
-      {!loading && employees.length > 0 && (
-        <div className="employee-grid">
-          {employees.map((employee) => (
-            <div 
-              key={employee.id} 
-              className="employee-card"
-              onClick={() => handleEmployeeSelect(employee)}
-            >
-              <div className="employee-info">
-                <div className="employee-id">{employee.employee_id}</div>
-                <div className="employee-name">{employee.name}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      {!loading && employees.length === 0 && (
-        <div className="no-employees">
-          <p>従業員データはありません</p>
-        </div>
-      )}
+      {/* 従業員選択コンポーネント */}
+      <EmployeeSelect
+        employees={employees}
+        onSelectEmployee={handleEmployeeSelect}
+      />
     </div>
   );
 };

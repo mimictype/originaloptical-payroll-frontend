@@ -1,0 +1,51 @@
+/* 横並びで左寄せする行 */
+.employee-select-id-name-row {
+  display: flex;
+  align-items: center;
+}
+
+/* 従業員選択スタイル */
+.employee-select-container {
+  margin-bottom: 30px;
+}
+
+.employee-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.employee-select-card {
+  border: 1px solid #d1d1d1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  transition: all 0.3s;
+  cursor: pointer;
+  background-color: #fff;
+}
+
+.employee-select-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #dcdcdc;
+}
+
+.employee-select-id {
+  background-color: #eaeaea;
+  color: #616161;
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-right: 20px;
+  min-width: 40px; /* IDの幅を固定 */
+  text-align: left;
+}
+
+.employee-select-name {
+  font-size: 1.1em;
+  font-weight: bold;
+  flex-grow: 1;
+  text-align: left;
+}

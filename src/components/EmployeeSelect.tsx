@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Employee } from '../types/employee';
 import './styles.css';
-import './employeeStyles.css';
+import './EmployeeSelect.css';
 
 interface EmployeeSelectProps {
   employees: Employee[];
@@ -15,19 +15,16 @@ const EmployeeSelect: React.FC<EmployeeSelectProps> = ({ employees, onSelectEmpl
 
   return (
     <div className="employee-select-container">
-      <h3>従業員一覧</h3>
-      <div className="employee-grid">
+      <div className="employee-select-grid">
         {employees.map(employee => (
           <div
             key={employee.id}
-            className="employee-card"
+            className="employee-select-card"
             onClick={() => onSelectEmployee(employee)}
           >
-            <div className="employee-id">{employee.employee_id}</div>
-            <div className="employee-name">{employee.name}</div>
-            <div className="employee-email">{employee.user_email}</div>
-            <div className="employee-bank">
-              {employee.bank_name}・{employee.bank_account}
+            <div className="employee-select-id-name-row">
+              <div className="employee-select-id">{employee.employee_id}</div>
+              <div className="employee-select-name">{employee.name}</div>
             </div>
           </div>
         ))}

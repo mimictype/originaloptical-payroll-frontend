@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import EmployeeSelect from '../components/EmployeeSelect';
 import { fetchEmployees } from '../services/api';
 import type { Employee } from '../types/employee';
 import DateSelector from '../components/DateSelector';
-// import '../components/employeeStyles.css';
 import './pageStyles.css';
 
 const PayrollQueryPage = () => {
@@ -20,6 +20,21 @@ const PayrollQueryPage = () => {
   
   const navigate = useNavigate();
 
+    // 従業員一覧の取得
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const data = await fetchEmployees();
+          setEmployees(data);
+          setLoading(false);
+        } catch (err: any) {
+          setError('従業員データの取得に失敗しました');
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }, []);
+
   // 日期変更時の処理
   const handleDateChange = (year: number, month: number) => {
     console.log(`PayrollQuery received date change: ${year}年 ${month}月`);
@@ -28,26 +43,6 @@ const PayrollQueryPage = () => {
   };
 
   // 従業員データの読み込み
-  useEffect(() => {
-    const getEmployees = async () => {
-      try {
-        setLoading(true);
-        // useCache=true to use cached data if available
-        const data = await fetchEmployees(true);
-        console.log(`Fetched ${data.length} employees`);
-        setEmployees(data);
-        setError(null);
-      } catch (err) {
-        console.error('従業員データの取得に失敗しました', err);
-        setError('従業員データの取得に失敗しました。再読み込みをお試しください。');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getEmployees();
-  }, []);
-
   // 従業員を選択した時の処理
   const handleEmployeeSelect = (employee: Employee) => {
     navigate(`/payroll/${employee.employee_id}/${selectedYear}/${selectedMonth}`);
@@ -77,29 +72,11 @@ const PayrollQueryPage = () => {
       
       {error && <div className="error-message">{error}</div>}
       
-      {/* 従業員一覧 */}
-      {!loading && employees.length > 0 && (
-        <div className="employee-grid">
-          {employees.map((employee) => (
-            <div 
-              key={employee.id} 
-              className="employee-card"
-              onClick={() => handleEmployeeSelect(employee)}
-            >
-              <div className="employee-info">
-                <div className="employee-id">{employee.employee_id}</div>
-                <div className="employee-name">{employee.name}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      
-      {!loading && employees.length === 0 && (
-        <div className="no-employees">
-          <p>従業員データはありません</p>
-        </div>
-      )}
+      {/* 従業員選択コンポーネント */}
+      <EmployeeSelect
+        employees={employees}
+        onSelectEmployee={handleEmployeeSelect}
+      />
     </div>
   );
 };

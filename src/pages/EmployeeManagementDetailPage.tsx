@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { Employee } from '../types/employee';
-import '../components/employeeStyles.css';
+import '../components/EmployeeManagementDetailPage.css';
 import './pageStyles.css';
 import { createEmployee, updateEmployee, deleteEmployee } from '../services/api';
 import { getCache } from '../utils/cache';
