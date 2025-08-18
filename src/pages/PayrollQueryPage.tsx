@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchEmployees } from '../services/api';
 import type { Employee } from '../types/employee';
 import DateSelector from '../components/DateSelector';
-import '../components/employeeStyles.css';
+// import '../components/employeeStyles.css';
 import './pageStyles.css';
 
 const PayrollQueryPage = () => {
