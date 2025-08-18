@@ -43,7 +43,12 @@ const EmployeeManagementPage = () => {
           className="back-to-top"
           onClick={() => navigate('/')}
         >
-          ← 首頁
+          <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '6px' }}>
+              <path d="M12 15L7 10L12 5" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            首頁
+          </span>
         </button>
         <h2>員工管理</h2>
         <button

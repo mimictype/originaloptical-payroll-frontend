@@ -123,7 +123,14 @@ const EmployeeManagementDetailPage = () => {
   return (
     <div className="employee-detail-page">
       <div className="page-header">
-        <button className="back-to-top" onClick={() => navigate('/employee-management')}>← 員工管理</button>
+        <button className="back-to-top" onClick={() => navigate('/employee-management')}>
+          <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '6px' }}>
+              <path d="M12 15L7 10L12 5" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            員工管理
+          </span>
+        </button>
         <h2>員工詳細</h2>
       </div>
       <form className="employee-form detail-form" onSubmit={e => e.preventDefault()}>
