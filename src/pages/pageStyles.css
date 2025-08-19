@@ -136,23 +136,6 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
-.back-to-top {
-  background-color: #f0f0f0;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  color: #333;
-  transition: background-color 0.3s;
-  align-self: flex-start;
-}
-
-.back-to-top:hover {
-  background-color: #e0e0e0;
-}
-
-
 .loading-message,
 .error-message,
 .no-employees {

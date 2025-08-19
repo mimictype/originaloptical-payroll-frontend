@@ -8,6 +8,7 @@ import './pageStyles.css';
 import SalarySection from '../components/SalarySection';
 import Section from '../components/Section';
 import LoadingSpinner from '../components/LoadingSpinner';
+import BackButton from '../components/BackButton';
 
 const PayrollDetailPage = () => {
   const { employeeId, year, month } = useParams<{
@@ -138,14 +139,7 @@ const PayrollDetailPage = () => {
     return (
       <div className="error-container">
         <div className="error">{error}</div>
-          <Link to="/payroll-query" className="back-button">
-            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '6px' }}>
-                <path d="M12 15L7 10L12 5" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              薪資發放明細査詢
-            </span>
-          </Link>
+          <BackButton label='薪資發放明細査詢' navigateTo='/payroll-query'/>
       </div>
     );
   }
@@ -154,14 +148,7 @@ const PayrollDetailPage = () => {
     return (
       <div className="error-container">
         <div className="error">給与明細が見つかりませんでした</div>
-          <Link to="/payroll-query" className="back-button">
-            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '6px' }}>
-                <path d="M12 15L7 10L12 5" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              薪資發放明細査詢
-            </span>
-          </Link>
+          <BackButton label='薪資發放明細査詢' navigateTo='/payroll-query'/>
       </div>
     );
   }
@@ -169,14 +156,7 @@ const PayrollDetailPage = () => {
   return (
     <div className="payroll-detail-page">
       <div className="navigation-header">
-          <Link to="/payroll-query" className="back-button">
-            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '6px' }}>
-                <path d="M12 15L7 10L12 5" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              薪資發放明細査詢
-            </span>
-          </Link>
+        <BackButton label='薪資發放明細査詢' navigateTo='/payroll-query'/>
         <h1>傑夫眼鏡行</h1>
         <h2>{formatPayrollDate(record.pay_date)}薪資發放明細表</h2>
       </div>
