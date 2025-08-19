@@ -7,6 +7,7 @@ import PayrollDetailPage from './pages/PayrollDetailPage'
 import EmployeeManagementPage from './pages/EmployeeManagementPage'
 import EmployeeManagementDetailPage from './pages/EmployeeManagementDetailPage'
 import PayrollManagementPage from './pages/PayrollManagementPage'
+import PayrollEditPage from './pages/PayrollEditPage';
 
 function App() {
   return (
@@ -19,7 +20,8 @@ function App() {
           <Route path="/employee-management" element={<EmployeeManagementPage />} />
           <Route path="/employee-management/create" element={<EmployeeManagementDetailPage />} />
           <Route path="/employee-management/:employee_id" element={<EmployeeManagementDetailPage />} />
-            <Route path="/payroll-management" element={<PayrollManagementPage />} />
+          <Route path="/payroll-management" element={<PayrollManagementPage />} />
+          <Route path="/payroll-edit/:employeeId/:year/:month" element={<PayrollEditPage />} />
         </Routes>
       </div>
     </Router>

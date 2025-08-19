@@ -1,0 +1,281 @@
+import React, { useState } from 'react';
+import type { LeaveDetail } from '../types';
+import EditableSalarySection from '../components/EditableSalarySection';
+import SalarySection from '../components/SalarySection';
+import Section from '../components/Section';
+import BackButton from '../components/BackButton';
+import './pageStyles.css';
+import type { Record } from '../types';
+
+const PayrollEditPage: React.FC = () => {
+  // 仮のデータ（編集用）
+  const [record, setRecord] = useState<Record>({
+    id: '1',
+    employee_id: 'A001',
+    user_email: 'test@example.com',
+    name: '山田太郎',
+    bank_name: '三井住友銀行',
+    bank_account: '1234567890',
+    pay_date: '114-08',
+    base_salary: 250000,
+    meal_allowance: 10000,
+    fixed_custom1_name: '役職手当',
+    fixed_custom1_amount: 20000,
+    fixed_custom2_name: '',
+    fixed_custom2_amount: 0,
+    fixed_custom3_name: '',
+    fixed_custom3_amount: 0,
+    subtotal_A: 280000,
+    overtime_weekday: 5000,
+    overtime_holiday: 3000,
+    overtime_restday: 2000,
+    overtime_national: 1000,
+    bonus: 15000,
+    variable_custom1_name: '',
+    variable_custom1_amount: 0,
+    variable_custom2_name: '',
+    variable_custom2_amount: 0,
+    variable_custom3_name: '',
+    variable_custom3_amount: 0,
+    subtotal_B: 26000,
+    labor_insurance: 3000,
+    health_insurance: 2000,
+    national_insurance: 1000,
+    absence_deduction: 0,
+    sick_deduction: 0,
+    deduct_custom1_name: '',
+    deduct_custom1_amount: 0,
+    deduct_custom2_name: '',
+    deduct_custom2_amount: 0,
+    deduct_custom3_name: '',
+    deduct_custom3_amount: 0,
+    subtotal_C: 6000
+  });
+
+  // 仮の休暇明細データ
+  const [leaveDetail, setLeaveDetail] = useState<LeaveDetail | null>({
+    id: '1',
+    leave_start: 1140801,
+    leave_end: 1140815,
+    carryover_days: 2,
+    granted_days: 7,
+    used_days: 3,
+    remaining_days: 4,
+    thismonth_leave_days: "8/30",
+    comp_expiry: 1141231,
+    carryover_hours: 5,
+    granted_hours: 2,
+    used_hours: 1,
+    cashout_hours: 0,
+    remaining_hours: 6
+  });
+  // 休暇明細編集時のコールバック
+  const handleLeaveChange = (rows: Array<{ label: string; value: string }>) => {
+    setLeaveDetail(prev => prev ? {
+      ...prev,
+      carryover_days: Number(rows[2]?.value) || 0,
+      granted_days: Number(rows[3]?.value) || 0,
+      used_days: Number(rows[4]?.value) || 0,
+      // 他の項目も必要なら追加
+    } : prev);
+  };
+
+
+  // EditableSalarySectionのonChange用コールバック
+  const handleFixedChange = (rows: Array<{ label: string; value: string }>) => {
+    setRecord(prev => ({
+      ...prev,
+      base_salary: Number(rows[0]?.value) || 0,
+      meal_allowance: Number(rows[1]?.value) || 0,
+      fixed_custom1_amount: Number(rows[2]?.value) || 0,
+      fixed_custom2_amount: Number(rows[3]?.value) || 0,
+      fixed_custom3_amount: Number(rows[4]?.value) || 0,
+    }));
+  };
+
+  const handleVariableChange = (rows: Array<{ label: string; value: string }>) => {
+    setRecord(prev => ({
+      ...prev,
+      overtime_weekday: Number(rows[0]?.value) || 0,
+      overtime_holiday: Number(rows[1]?.value) || 0,
+      overtime_restday: Number(rows[2]?.value) || 0,
+      overtime_national: Number(rows[3]?.value) || 0,
+      bonus: Number(rows[4]?.value) || 0,
+      variable_custom1_amount: Number(rows[5]?.value) || 0,
+      variable_custom2_amount: Number(rows[6]?.value) || 0,
+      variable_custom3_amount: Number(rows[7]?.value) || 0,
+    }));
+  };
+
+  const handleDeductChange = (rows: Array<{ label: string; value: string }>) => {
+    setRecord(prev => ({
+      ...prev,
+      labor_insurance: Number(rows[0]?.value) || 0,
+      health_insurance: Number(rows[1]?.value) || 0,
+      national_insurance: Number(rows[2]?.value) || 0,
+      absence_deduction: Number(rows[3]?.value) || 0,
+      sick_deduction: Number(rows[4]?.value) || 0,
+      deduct_custom1_amount: Number(rows[5]?.value) || 0,
+      deduct_custom2_amount: Number(rows[6]?.value) || 0,
+      deduct_custom3_amount: Number(rows[7]?.value) || 0,
+    }));
+  };
+
+  // 固定給 editable rows（カスタム項目は必ず表示）
+  const fixedRows = [
+    { label: '底薪', value: String(record.base_salary), editableLabel: false },
+    { label: '伙食津貼', value: String(record.meal_allowance), editableLabel: false },
+    { label: record.fixed_custom1_name || '', value: String(record.fixed_custom1_amount || ''), editableLabel: true },
+    { label: record.fixed_custom2_name || '', value: String(record.fixed_custom2_amount || ''), editableLabel: true },
+    { label: record.fixed_custom3_name || '', value: String(record.fixed_custom3_amount || ''), editableLabel: true },
+  ];
+  const fixedTotal =
+    record.base_salary +
+    record.meal_allowance +
+    (record.fixed_custom1_amount || 0) +
+    (record.fixed_custom2_amount || 0) +
+    (record.fixed_custom3_amount || 0);
+
+  // 非固定 editable rows（カスタム項目は必ず表示）
+  const variableRows = [
+    { label: '平日加班費', value: String(record.overtime_weekday), editableLabel: false },
+    { label: '休假日加班費', value: String(record.overtime_holiday), editableLabel: false },
+    { label: '休息日加班費', value: String(record.overtime_restday), editableLabel: false },
+    { label: '國定假日加班費', value: String(record.overtime_national), editableLabel: false },
+    { label: '獎金', value: String(record.bonus), editableLabel: false },
+    { label: record.variable_custom1_name || '', value: String(record.variable_custom1_amount || ''), editableLabel: true },
+    { label: record.variable_custom2_name || '', value: String(record.variable_custom2_amount || ''), editableLabel: true },
+    { label: record.variable_custom3_name || '', value: String(record.variable_custom3_amount || ''), editableLabel: true },
+  ];
+  const variableTotal =
+    record.overtime_weekday +
+    record.overtime_holiday +
+    record.overtime_restday +
+    record.overtime_national +
+    record.bonus +
+    (record.variable_custom1_amount || 0) +
+    (record.variable_custom2_amount || 0) +
+    (record.variable_custom3_amount || 0);
+
+  // 控除 editable rows（カスタム項目は必ず表示）
+  const deductRows = [
+    { label: '勞保費', value: String(record.labor_insurance), editableLabel: false },
+    { label: '健保費', value: String(record.health_insurance), editableLabel: false },
+    { label: '國保', value: String(record.national_insurance), editableLabel: false },
+    { label: '事假扣款', value: String(record.absence_deduction), editableLabel: false },
+    { label: '病假扣款', value: String(record.sick_deduction), editableLabel: false },
+    { label: record.deduct_custom1_name || '', value: String(record.deduct_custom1_amount || ''), editableLabel: true },
+    { label: record.deduct_custom2_name || '', value: String(record.deduct_custom2_amount || ''), editableLabel: true },
+    { label: record.deduct_custom3_name || '', value: String(record.deduct_custom3_amount || ''), editableLabel: true },
+  ];
+  const deductTotal =
+    record.labor_insurance +
+    record.health_insurance +
+    record.national_insurance +
+    record.absence_deduction +
+    record.sick_deduction +
+    (record.deduct_custom1_amount || 0) +
+    (record.deduct_custom2_amount || 0) +
+    (record.deduct_custom3_amount || 0);
+
+
+  // 日付フォーマット関数
+  const formatDate = (dateNum: number) => {
+    const dateStr = dateNum.toString();
+    if (dateStr.length === 7) {
+      // Format: YYYMMDD (民国年)
+      const year = dateStr.substring(0, 3);
+      const month = dateStr.substring(3, 5);
+      const day = dateStr.substring(5, 7);
+      return `${year}-${month}-${day}`;
+    }
+    return dateStr;
+  };
+
+  // 今年未休日數合計を自動計算
+  const remainingDaysTotal = React.useMemo(() => {
+    if (!leaveDetail) return '';
+    return String(
+      Number(leaveDetail.carryover_days || 0) +
+      Number(leaveDetail.granted_days || 0) -
+      Number(leaveDetail.used_days || 0)
+    );
+  }, [leaveDetail]);
+
+  return (
+    <div className="payroll-edit-page">
+      <div className="navigation-header">
+        <BackButton label="薪資管理" navigateTo="/payroll-management" />
+        <h1>{record.pay_date}</h1>
+        <h2>薪資發放明細修改</h2>
+      </div>
+
+      <Section title="薪資明細">
+        <EditableSalarySection
+          title="固定薪資結構"
+          rows={fixedRows}
+          showTotal
+          totalLabel="小計(A)"
+          totalValue={String(fixedTotal)}
+          onChange={handleFixedChange}
+        />
+        <EditableSalarySection
+          title="非固定支付項目"
+          rows={variableRows}
+          showTotal
+          totalLabel="小計(B)"
+          totalValue={String(variableTotal)}
+          onChange={handleVariableChange}
+        />
+        <EditableSalarySection
+          title="應代扣項目"
+          rows={deductRows}
+          showTotal
+          totalLabel="小計(C)"
+          totalValue={String(deductTotal)}
+          onChange={handleDeductChange}
+        />
+        <SalarySection
+          title="合計"
+          rows={[]}
+          subtotalLabel="總計 (A+B-C)"
+          subtotalValue={String(fixedTotal + variableTotal - deductTotal)}
+        />
+      </Section>
+
+      {/* 休暇明細 セクション（可編集） */}
+      {leaveDetail && (
+        <Section title="休假明細">
+          <div className="leave-details">
+            <EditableSalarySection
+              title="特別休假"
+              rows={[ 
+                { label: '請休期間開始', value: formatDate(leaveDetail.leave_start), editableLabel: false },
+                { label: '請休期間結束', value: formatDate(leaveDetail.leave_end), editableLabel: false },
+                { label: '經過遞延日數', value: String(leaveDetail.carryover_days), editableLabel: false },
+                { label: '今年可休日數', value: String(leaveDetail.granted_days), editableLabel: false },
+                { label: '今年已休日數', value: String(leaveDetail.used_days), editableLabel: false },
+                { label: '今年未休日數合計', value: remainingDaysTotal, editableLabel: false, editableValue: false },
+                ...(leaveDetail.thismonth_leave_days ? [{ label: '今月請休日', value: leaveDetail.thismonth_leave_days, editableLabel: false }] : [])
+              ]}
+              onChange={handleLeaveChange}
+            />
+            <EditableSalarySection
+              title="加班補休"
+              rows={[ 
+                { label: '勞雇約定之補休期限', value: formatDate(leaveDetail.comp_expiry), editableLabel: false },
+                { label: '至上月底止休未補休時數', value: String(leaveDetail.carryover_hours), editableLabel: false },
+                { label: '本月選擇補休時數', value: String(leaveDetail.granted_hours), editableLabel: false },
+                { label: '本月已補休時數', value: String(leaveDetail.used_hours), editableLabel: false },
+                { label: '屆期未休補折發工資時數', value: String(leaveDetail.cashout_hours), editableLabel: false },
+                { label: '至本月止休未休補休時數', value: String(leaveDetail.remaining_hours), editableLabel: false },
+              ]}
+            />
+          </div>
+        </Section>
+      )}
+    </div>
+  );
+};
+
+export default PayrollEditPage;
