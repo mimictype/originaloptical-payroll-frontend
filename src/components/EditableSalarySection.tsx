@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
 import './EditableSalarySection.css';
 
+interface EditableSalaryRow {
+  label: string;
+  value: string;
+  editableLabel?: boolean;
+  editableValue?: boolean; // この項目の値入力枠が編集可能か（デフォルト: true）
+}
+
 interface EditableSalarySectionProps {
   title: string;
-  rows: Array<{ label: string; value: string; editableLabel?: boolean }>; // label/value pairs for table rows, editableLabel for editable label
-  // ...existing code...
+  rows: EditableSalaryRow[];
+  showTotal?: boolean; // 合計表示フラグ
+  totalLabel?: string; // 合計ラベル（例: "合計"）
+  totalValue?: number | string; // 外部から渡される合計値
   onChange?: (rows: Array<{ label: string; value: string }>) => void;
 }
 
-const EditableSalarySection: React.FC<EditableSalarySectionProps> = ({ title, rows, onChange }) => {
+const EditableSalarySection: React.FC<EditableSalarySectionProps> = ({ title, rows, showTotal = false, totalLabel = '合計', totalValue, onChange }) => {
   const [editRows, setEditRows] = useState(rows);
+  React.useEffect(() => {
+    setEditRows(rows);
+  }, [rows]);
 
   const handleValueChange = (idx: number, newValue: string) => {
     const updatedRows = editRows.map((row, i) =>
@@ -27,8 +39,9 @@ const EditableSalarySection: React.FC<EditableSalarySectionProps> = ({ title, ro
     if (onChange) onChange(updatedRows);
   };
 
+
   return (
-    <div className="salary-section">
+    <div className="editable-salary-section">
       <h5>{title}</h5>
       <table className="payroll-table">
         <tbody>
@@ -47,15 +60,25 @@ const EditableSalarySection: React.FC<EditableSalarySectionProps> = ({ title, ro
                   )}
               </td>
               <td>
-                  <input
-                    type="text"
-                    className="value-input"
-                    value={row.value}
-                    onChange={e => handleValueChange(idx, e.target.value)}
-                  />
+                  {row.editableValue === false ? (
+                    <span className="readonly-value">{row.value}</span>
+                  ) : (
+                    <input
+                      type="text"
+                      className="value-input"
+                      value={row.value}
+                      onChange={e => handleValueChange(idx, e.target.value)}
+                    />
+                  )}
               </td>
             </tr>
           ))}
+          {showTotal && (
+            <tr>
+              <td><strong>{totalLabel}</strong></td>
+              <td><strong>{totalValue}</strong></td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
