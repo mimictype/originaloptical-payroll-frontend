@@ -2,6 +2,7 @@ import React from 'react';
 import type { Employee } from '../types/employee';
 import './styles.css';
 import './EmployeeSelect.css';
+import LoadingSpinner from './LoadingSpinner';
 
 interface EmployeeSelectProps {
   employees: Employee[];
@@ -10,7 +11,7 @@ interface EmployeeSelectProps {
 
 const EmployeeSelect: React.FC<EmployeeSelectProps> = ({ employees, onSelectEmployee }) => {
   if (employees.length === 0) {
-    return <div className="loading">従業員データを読み込み中...</div>;
+    return <LoadingSpinner />;
   }
 
   return (

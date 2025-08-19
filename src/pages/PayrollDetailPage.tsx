@@ -7,6 +7,7 @@ import type { Employee } from '../types/employee';
 import './pageStyles.css';
 import SalarySection from '../components/SalarySection';
 import Section from '../components/Section';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const PayrollDetailPage = () => {
   const { employeeId, year, month } = useParams<{
@@ -130,7 +131,7 @@ const PayrollDetailPage = () => {
   };
 
   if (loading) {
-    return <div className="loading">明細を読み込み中...</div>;
+    return <LoadingSpinner />;
   }
 
   if (error) {

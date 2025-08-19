@@ -8,10 +8,8 @@ import './pageStyles.css';
 
 const PayrollQueryPage = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Initialize with default values to avoid null state
   const now = new Date();
   const currentRocYear = now.getFullYear() - 1911;
   const currentMonth = now.getMonth() + 1;
@@ -26,10 +24,8 @@ const PayrollQueryPage = () => {
         try {
           const data = await fetchEmployees();
           setEmployees(data);
-          setLoading(false);
         } catch (err: any) {
           setError('従業員データの取得に失敗しました');
-          setLoading(false);
         }
       };
       fetchData();
@@ -42,7 +38,6 @@ const PayrollQueryPage = () => {
     setSelectedMonth(month);
   };
 
-  // 従業員データの読み込み
   // 従業員を選択した時の処理
   const handleEmployeeSelect = (employee: Employee) => {
     navigate(`/payroll/${employee.employee_id}/${selectedYear}/${selectedMonth}`);
@@ -67,8 +62,6 @@ const PayrollQueryPage = () => {
       
       {/* 年月選擇器 */}
       <DateSelector onDateChange={handleDateChange} />
-      
-      {loading && <p className="loading-message">載入中...</p>}
       
       {error && <div className="error-message">{error}</div>}
       

@@ -8,7 +8,6 @@ import './pageStyles.css';
 
 const EmployeeManagementPage = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
@@ -17,7 +16,6 @@ const EmployeeManagementPage = () => {
   useEffect(() => {
     const getEmployees = async () => {
       try {
-        setLoading(true);
   const data = await fetchEmployees(true);
   setEmployees(data);
   setCache<Employee[]>("employees", data);
@@ -25,7 +23,6 @@ const EmployeeManagementPage = () => {
       } catch (err) {
         setError('従業員データの取得に失敗しました。再読み込みをお試しください。');
       } finally {
-        setLoading(false);
       }
     };
     getEmployees();
@@ -58,7 +55,6 @@ const EmployeeManagementPage = () => {
           新規作成
         </button>
       </div>
-      {loading && <p className="loading-message">載入中...</p>}
       {error && <div className="error-message">{error}</div>}
       {/* 従業員選択コンポーネント */}
       <EmployeeSelect
