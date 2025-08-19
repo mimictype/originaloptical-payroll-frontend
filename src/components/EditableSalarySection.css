@@ -1,0 +1,72 @@
+/* 給与セクション全体のスタイル */
+.salary-section {
+  margin-bottom: 2rem;
+  background: #def0de;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* セクションタイトルのスタイル */
+.salary-section h5 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+/* テーブル全体のスタイル */
+.payroll-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* テーブルセルのスタイル */
+.payroll-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+
+/* 最後の行の下線を消す */
+.payroll-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* 編集不可ラベルのspanスタイル */
+.readonly-label {
+  color: #000000;
+  font-style: italic;
+  font-size: 1rem;
+  padding: 0.3rem;
+  display: inline-block;
+  font-weight: bold;
+  width: 130%;
+}
+
+/* value入力枠のinputスタイル */
+.value-input {
+  padding: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #fff;
+  color: #222;
+  width: 50%;
+  text-align: right;
+}
+
+/* 編集可能ラベルのinputスタイル */
+.editable-label {
+  padding: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #fff;
+  color: #333;
+  font-weight: bold;
+  width: 130%;
+}
+
+.payroll-table tr:last-child td {
+  border-bottom: none;
+}
