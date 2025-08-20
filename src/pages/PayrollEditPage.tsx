@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import type { LeaveDetail } from '../types';
 import EditableSalarySection from '../components/EditableSalarySection';
 import SalarySection from '../components/SalarySection';
@@ -6,69 +7,59 @@ import Section from '../components/Section';
 import BackButton from '../components/BackButton';
 import './pageStyles.css';
 import type { Record } from '../types';
+import { fetchEmployeePayroll, fetchEmployeeLeave } from '../services/api';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const PayrollEditPage: React.FC = () => {
-  // 仮のデータ（編集用）
-  const [record, setRecord] = useState<Record>({
-    id: '1',
-    employee_id: 'A001',
-    user_email: 'test@example.com',
-    name: '山田太郎',
-    bank_name: '三井住友銀行',
-    bank_account: '1234567890',
-    pay_date: '114-08',
-    base_salary: 250000,
-    meal_allowance: 10000,
-    fixed_custom1_name: '役職手当',
-    fixed_custom1_amount: 20000,
-    fixed_custom2_name: '',
-    fixed_custom2_amount: 0,
-    fixed_custom3_name: '',
-    fixed_custom3_amount: 0,
-    subtotal_A: 280000,
-    overtime_weekday: 5000,
-    overtime_holiday: 3000,
-    overtime_restday: 2000,
-    overtime_national: 1000,
-    bonus: 15000,
-    variable_custom1_name: '',
-    variable_custom1_amount: 0,
-    variable_custom2_name: '',
-    variable_custom2_amount: 0,
-    variable_custom3_name: '',
-    variable_custom3_amount: 0,
-    subtotal_B: 26000,
-    labor_insurance: 3000,
-    health_insurance: 2000,
-    national_insurance: 1000,
-    absence_deduction: 0,
-    sick_deduction: 0,
-    deduct_custom1_name: '',
-    deduct_custom1_amount: 0,
-    deduct_custom2_name: '',
-    deduct_custom2_amount: 0,
-    deduct_custom3_name: '',
-    deduct_custom3_amount: 0,
-    subtotal_C: 6000
-  });
+  // URLパラメータから従業員ID・年月取得
+  const { employeeId, year, month } = useParams<{
+    employeeId: string;
+    year: string;
+    month: string;
+  }>();
 
-  // 仮の休暇明細データ
-  const [leaveDetail, setLeaveDetail] = useState<LeaveDetail | null>({
-    id: '1',
-    leave_start: 1140801,
-    leave_end: 1140815,
-    carryover_days: 2,
-    granted_days: 7,
-    used_days: 3,
-    remaining_days: 4,
-    thismonth_leave_days: "8/30",
-    comp_expiry: 1141231,
-    carryover_hours: 5,
-    granted_hours: 2,
-    used_hours: 1,
-    cashout_hours: 0,
-    remaining_hours: 6
-  });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  // APIから取得したデータ
+  const [record, setRecord] = useState<Record | null>(null);
+
+  const [leaveDetail, setLeaveDetail] = useState<LeaveDetail | null>(null);
+
+  // データ取得処理
+  useEffect(() => {
+    const getPayrollDetail = async () => {
+      if (!employeeId || !year || !month) {
+        setError('従業員IDと年月が指定されていません');
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const yearNum = parseInt(year, 10);
+        const monthNum = parseInt(month, 10);
+        const [payrollData, leaveData] = await Promise.allSettled([
+          fetchEmployeePayroll(employeeId, yearNum, monthNum, true),
+          fetchEmployeeLeave(employeeId, yearNum, monthNum, true)
+        ]);
+        if (payrollData.status === 'fulfilled') {
+          setRecord(payrollData.value);
+        } else {
+          setError('給与明細の取得に失敗しました');
+        }
+        if (leaveData.status === 'fulfilled') {
+          setLeaveDetail(leaveData.value);
+        } else {
+          setLeaveDetail(null);
+        }
+        setError(null);
+      } catch (err) {
+        setError('データの取得に失敗しました。再読み込みをお試しください。');
+      } finally {
+        setLoading(false);
+      }
+    };
+    getPayrollDetail();
+  }, [employeeId, year, month]);
   // 休暇明細編集時のコールバック
   const handleLeaveChange = (rows: Array<{ label: string; value: string }>) => {
     setLeaveDetail(prev => prev ? {
@@ -83,18 +74,18 @@ const PayrollEditPage: React.FC = () => {
 
   // EditableSalarySectionのonChange用コールバック
   const handleFixedChange = (rows: Array<{ label: string; value: string }>) => {
-    setRecord(prev => ({
+    setRecord(prev => prev ? ({
       ...prev,
       base_salary: Number(rows[0]?.value) || 0,
       meal_allowance: Number(rows[1]?.value) || 0,
       fixed_custom1_amount: Number(rows[2]?.value) || 0,
       fixed_custom2_amount: Number(rows[3]?.value) || 0,
       fixed_custom3_amount: Number(rows[4]?.value) || 0,
-    }));
+    }) : prev);
   };
 
   const handleVariableChange = (rows: Array<{ label: string; value: string }>) => {
-    setRecord(prev => ({
+    setRecord(prev => prev ? ({
       ...prev,
       overtime_weekday: Number(rows[0]?.value) || 0,
       overtime_holiday: Number(rows[1]?.value) || 0,
@@ -104,11 +95,11 @@ const PayrollEditPage: React.FC = () => {
       variable_custom1_amount: Number(rows[5]?.value) || 0,
       variable_custom2_amount: Number(rows[6]?.value) || 0,
       variable_custom3_amount: Number(rows[7]?.value) || 0,
-    }));
+    }) : prev);
   };
 
   const handleDeductChange = (rows: Array<{ label: string; value: string }>) => {
-    setRecord(prev => ({
+    setRecord(prev => prev ? ({
       ...prev,
       labor_insurance: Number(rows[0]?.value) || 0,
       health_insurance: Number(rows[1]?.value) || 0,
@@ -118,26 +109,27 @@ const PayrollEditPage: React.FC = () => {
       deduct_custom1_amount: Number(rows[5]?.value) || 0,
       deduct_custom2_amount: Number(rows[6]?.value) || 0,
       deduct_custom3_amount: Number(rows[7]?.value) || 0,
-    }));
+    }) : prev);
   };
 
   // 固定給 editable rows（カスタム項目は必ず表示）
-  const fixedRows = [
+  const fixedRows = record ? [
     { label: '底薪', value: String(record.base_salary), editableLabel: false },
     { label: '伙食津貼', value: String(record.meal_allowance), editableLabel: false },
     { label: record.fixed_custom1_name || '', value: String(record.fixed_custom1_amount || ''), editableLabel: true },
     { label: record.fixed_custom2_name || '', value: String(record.fixed_custom2_amount || ''), editableLabel: true },
     { label: record.fixed_custom3_name || '', value: String(record.fixed_custom3_amount || ''), editableLabel: true },
-  ];
-  const fixedTotal =
+  ] : [];
+  const fixedTotal = record ? (
     record.base_salary +
     record.meal_allowance +
     (record.fixed_custom1_amount || 0) +
     (record.fixed_custom2_amount || 0) +
-    (record.fixed_custom3_amount || 0);
+    (record.fixed_custom3_amount || 0)
+  ) : 0;
 
   // 非固定 editable rows（カスタム項目は必ず表示）
-  const variableRows = [
+  const variableRows = record ? [
     { label: '平日加班費', value: String(record.overtime_weekday), editableLabel: false },
     { label: '休假日加班費', value: String(record.overtime_holiday), editableLabel: false },
     { label: '休息日加班費', value: String(record.overtime_restday), editableLabel: false },
@@ -146,8 +138,8 @@ const PayrollEditPage: React.FC = () => {
     { label: record.variable_custom1_name || '', value: String(record.variable_custom1_amount || ''), editableLabel: true },
     { label: record.variable_custom2_name || '', value: String(record.variable_custom2_amount || ''), editableLabel: true },
     { label: record.variable_custom3_name || '', value: String(record.variable_custom3_amount || ''), editableLabel: true },
-  ];
-  const variableTotal =
+  ] : [];
+  const variableTotal = record ? (
     record.overtime_weekday +
     record.overtime_holiday +
     record.overtime_restday +
@@ -155,10 +147,11 @@ const PayrollEditPage: React.FC = () => {
     record.bonus +
     (record.variable_custom1_amount || 0) +
     (record.variable_custom2_amount || 0) +
-    (record.variable_custom3_amount || 0);
+    (record.variable_custom3_amount || 0)
+  ) : 0;
 
   // 控除 editable rows（カスタム項目は必ず表示）
-  const deductRows = [
+  const deductRows = record ? [
     { label: '勞保費', value: String(record.labor_insurance), editableLabel: false },
     { label: '健保費', value: String(record.health_insurance), editableLabel: false },
     { label: '國保', value: String(record.national_insurance), editableLabel: false },
@@ -167,8 +160,8 @@ const PayrollEditPage: React.FC = () => {
     { label: record.deduct_custom1_name || '', value: String(record.deduct_custom1_amount || ''), editableLabel: true },
     { label: record.deduct_custom2_name || '', value: String(record.deduct_custom2_amount || ''), editableLabel: true },
     { label: record.deduct_custom3_name || '', value: String(record.deduct_custom3_amount || ''), editableLabel: true },
-  ];
-  const deductTotal =
+  ] : [];
+  const deductTotal = record ? (
     record.labor_insurance +
     record.health_insurance +
     record.national_insurance +
@@ -176,7 +169,8 @@ const PayrollEditPage: React.FC = () => {
     record.sick_deduction +
     (record.deduct_custom1_amount || 0) +
     (record.deduct_custom2_amount || 0) +
-    (record.deduct_custom3_amount || 0);
+    (record.deduct_custom3_amount || 0)
+  ) : 0;
 
 
   // 日付フォーマット関数
@@ -202,6 +196,29 @@ const PayrollEditPage: React.FC = () => {
     );
   }, [leaveDetail]);
 
+  if (loading) {
+        return <LoadingSpinner />;
+  }
+  if (error) {
+    return (
+      <div className="payroll-edit-page">
+        <div className="error-container">
+          <div className="error">{error}</div>
+          <BackButton label="薪資管理" navigateTo="/payroll-management" />
+        </div>
+      </div>
+    );
+  }
+  if (!record) {
+    return (
+      <div className="payroll-edit-page">
+        <div className="error-container">
+          <div className="error">給与明細が見つかりませんでした</div>
+          <BackButton label="薪資管理" navigateTo="/payroll-management" />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="payroll-edit-page">
       <div className="navigation-header">

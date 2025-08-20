@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchEmployeePayroll, fetchEmployeeLeave, CACHE_KEYS } from '../services/api';
 import { getCache } from '../utils/cache';
 import type { Record, LeaveDetail } from '../types';
@@ -11,6 +11,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import BackButton from '../components/BackButton';
 
 const PayrollDetailPage = () => {
+  const navigate = useNavigate();
   const { employeeId, year, month } = useParams<{
     employeeId: string;
     year: string;
@@ -144,13 +145,15 @@ const PayrollDetailPage = () => {
     );
   }
 
+  // 給与明細がなければ作成ページへ遷移
+  useEffect(() => {
+    if (!loading && !record) {
+      navigate(`/payroll-create/${employeeId}/${year}/${month}`);
+    }
+  }, [loading, record, employeeId, year, month, navigate]);
   if (!record) {
-    return (
-      <div className="error-container">
-        <div className="error">給与明細が見つかりませんでした</div>
-          <BackButton label='薪資發放明細査詢' navigateTo='/payroll-query'/>
-      </div>
-    );
+    // 遷移中は何も表示しない
+    return null;
   }
 
   return (
