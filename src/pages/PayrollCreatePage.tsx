@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import type { LeaveDetail } from '../types';
+import type { LeaveDetail, Record } from '../types/index';
 import EditableSalarySection from '../components/EditableSalarySection';
 import SalarySection from '../components/SalarySection';
 import Section from '../components/Section';
 import BackButton from '../components/BackButton';
 import './pageStyles.css';
-import type { Record } from '../types';
 import { fetchEmployeePayroll, fetchEmployeeLeave } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const PayrollCreatePage: React.FC = () => {
+  // 特別休暇データ
+  const [leaveDetail, setLeaveDetail] = useState<LeaveDetail | null>(null);
+
   // URLパラメータから従業員ID・年月取得
   const { employeeId, year, month } = useParams<{
     employeeId: string;
@@ -42,15 +44,12 @@ const PayrollCreatePage: React.FC = () => {
         } else {
           monthNum -= 1;
         }
-        const [payrollData] = await Promise.allSettled([
+        const [payrollData, leaveData] = await Promise.all([
           fetchEmployeePayroll(employeeId, yearNum, monthNum, true),
           fetchEmployeeLeave(employeeId, yearNum, monthNum, true)
         ]);
-        if (payrollData.status === 'fulfilled') {
-          setRecord(payrollData.value);
-        } else {
-          setError('給与明細の取得に失敗しました');
-        }
+        setRecord(payrollData);
+        setLeaveDetail(leaveData);
         setError(null);
       } catch (err) {
         setError('データの取得に失敗しました。再読み込みをお試しください。');
@@ -83,7 +82,6 @@ const PayrollCreatePage: React.FC = () => {
   }, [record]);
   const fixedTotal = React.useMemo(() => fixedRows.reduce((sum, row) => sum + Number(row.value), 0), [fixedRows]);
 
-  // 非固定項目
   // 控除項目
   const [deductRows, setDeductRows] = useState([
     { label: '勞保費', value: '', editableLabel: false },
@@ -233,7 +231,7 @@ const PayrollCreatePage: React.FC = () => {
   ] : [];
   const lastMonthFixedTotal = lastMonthFixedRows.reduce((sum, row) => sum + Number(row.value), 0);
 
-  // 本月發放預覽（上月實發＋本月調整額）
+  // 本月發放預覽（上月実發＋本月調整額）
   const previewFixedRows = React.useMemo(() => {
     // ラベル: fixedRowsのrow.label !== ''のみ抽出
     // 固定項目の値: lastMonthFixedRows+fixedRowsで合算
@@ -268,6 +266,7 @@ const PayrollCreatePage: React.FC = () => {
   }, [lastMonthFixedTotal, fixedRows]);
 // memo
 
+
   // 日付フォーマット関数
   const formatDate = (dateNum: number) => {
     const dateStr = dateNum.toString();
@@ -281,7 +280,65 @@ const PayrollCreatePage: React.FC = () => {
     return dateStr;
   };
 
+  // 特別休暇調整額 rows
+  const [leaveAdjustmentRows, setLeaveAdjustmentRows] = useState([
+    { label: '請休期間開始', value: '', editableLabel: false },
+    { label: '請休期間結束', value: '', editableLabel: false },
+    { label: '經過遞延日數', value: '', editableLabel: false },
+    { label: '今月已休日數', value: '', editableLabel: false },
+    { label: '今月請休日', value: '', editableLabel: false }
+  ]);
+  useEffect(() => {
+    if (leaveDetail) {
+      setLeaveAdjustmentRows([
+        { label: '請休期間開始', value: formatDate(leaveDetail.leave_start), editableLabel: false },
+        { label: '請休期間結束', value: formatDate(leaveDetail.leave_end), editableLabel: false },
+        { label: '經過遞延日數', value: '', editableLabel: false },
+        { label: '今月已休日數', value: '', editableLabel: false },
+        { label: '今月請休日', value: '', editableLabel: false }
+      ]);
+    }
+  }, [leaveDetail]);
+    
+  // 特別休暇 上月実績 rows を const で定義
+  const lastMonthLeaveRows = leaveDetail ? [
+    { label: '請休期間開始', value: formatDate(leaveDetail.leave_start) },
+    { label: '請休期間結束', value: formatDate(leaveDetail.leave_end) },
+    { label: '經過遞延日數', value: `${leaveDetail.carryover_days}` },
+    { label: '今年可休日數', value: `${leaveDetail.granted_days}` },
+    { label: '今年已休日數', value: `${leaveDetail.used_days}` },
+    { label: '今年未休日數', value: `${leaveDetail.remaining_days}` },
+    ...(leaveDetail.thismonth_leave_days ? [{ label: '今月請休日', value: leaveDetail.thismonth_leave_days }] : [])
+  ] : [];
+  // previewLeaveRows: ラベルごとにlastMonthLeaveRowsとleaveAdjustmentRowsを使い分けるロジック
+  const previewLeaveRows = React.useMemo(() => {
+    const resultRows: Array<{ label: string; value: string }> = [];
+    let grantedValue: number | null = null;
+    let usedValue: number | null = null;
 
+    lastMonthLeaveRows.forEach(row => {
+      if (row.label === '請休期間開始' || row.label === '請休期間結束' || row.label === '今月請休日' || row.label === '經過遞延日數') {
+        resultRows.push({ label: row.label, value: String(leaveAdjustmentRows.find(r => r.label === row.label)?.value) });
+      } else if (row.label === '今年可休日數') {
+        const adjustmentRow = leaveAdjustmentRows.find(r => r.label === '經過遞延日數');
+        const value = adjustmentRow ? String(Number(row.value) + Number(adjustmentRow.value)) : row.value;
+        resultRows.push({ label: row.label, value });
+        grantedValue = Number(value);
+      } else if (row.label === '今年已休日數') {
+        const adjustmentRow = leaveAdjustmentRows.find(r => r.label === '今月已休日數');
+        const value = adjustmentRow ? String(Number(row.value) + Number(adjustmentRow.value)) : row.value;
+        resultRows.push({ label: row.label, value });
+        usedValue = Number(value);
+      }
+    });
+
+    // 今年未休日數を追加
+    if (grantedValue !== null && usedValue !== null) {
+      resultRows.push({ label: '今年未休日數', value: String(grantedValue - usedValue) });
+    }
+
+    return resultRows;
+  }, [lastMonthLeaveRows, leaveAdjustmentRows]);
   if (loading) {
         return <LoadingSpinner />;
   }
@@ -422,6 +479,31 @@ const PayrollCreatePage: React.FC = () => {
           subtotalValue={String(previewFixedTotal + previewVariableTotal - previewDeductTotal - (lastMonthFixedTotal + lastMonthVariableTotal - lastMonthDeductTotal))}
         />
       </Section>
+      {leaveDetail && (
+      <Section title="特別休假">
+        <SalarySection
+          title="上月實績"
+          rows={lastMonthLeaveRows}
+        />
+        <SalarySection
+          title="本月預覽"
+          rows={previewLeaveRows}
+        />
+        <EditableSalarySection
+          title="本月調整"
+          rows={leaveAdjustmentRows}
+          onChange={
+            (rows) => {
+              const updatedRows = rows.map((row, idx) => ({
+                ...row,
+                editableLabel: leaveAdjustmentRows[idx]?.editableLabel ?? false
+              }));
+              setLeaveAdjustmentRows(updatedRows);
+            }
+          }
+        />
+      </Section>
+      )}
     </div>
   );
 };
