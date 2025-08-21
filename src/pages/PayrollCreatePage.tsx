@@ -61,43 +61,166 @@ const PayrollCreatePage: React.FC = () => {
     getPayrollDetail();
   }, [employeeId, year, month]);
 
-
-  // EditableSalarySectionは全て値0・カスタム項目名空で初期化（useState管理）
+  // 固定項目
   const [fixedRows, setFixedRows] = useState([
-  { label: '底薪', value: '', editableLabel: false },
-  { label: '伙食津貼', value: '', editableLabel: false },
-  { label: '', value: '', editableLabel: true },
-  { label: '', value: '', editableLabel: true },
-  { label: '', value: '', editableLabel: true },
+    { label: '底薪', value: '', editableLabel: false },
+    { label: '伙食津貼', value: '', editableLabel: false },
+    { label: '', value: '', editableLabel: true },
+    { label: '', value: '', editableLabel: true },
+    { label: '', value: '', editableLabel: true },
   ]);
-
-  // record取得後にカスタム項目をfixedRowsへ反映
   useEffect(() => {
     if (record) {
       const newRows = [
         { label: '底薪', value: '', editableLabel: false },
-        { label: '伙食津貼', value: '', editableLabel: false }
+        { label: '伙食津貼', value: '', editableLabel: false },
+        { label: record.fixed_custom1_name ? record.fixed_custom1_name : '', value: record.fixed_custom1_name ? String(record.fixed_custom1_amount || '') : '', editableLabel: true },
+        { label: record.fixed_custom2_name ? record.fixed_custom2_name : '', value: record.fixed_custom2_name ? String(record.fixed_custom2_amount || '') : '', editableLabel: true },
+        { label: record.fixed_custom3_name ? record.fixed_custom3_name : '', value: record.fixed_custom3_name ? String(record.fixed_custom3_amount || '') : '', editableLabel: true },
       ];
-      // 先月にカスタム項目が存在する場合は追加、無ければ空のままで追加
-      newRows.push({
-        label: record.fixed_custom1_name ? record.fixed_custom1_name : '',
-        value: record.fixed_custom1_name ? String(record.fixed_custom1_amount || '') : '',
-        editableLabel: true
-      });
-      newRows.push({
-        label: record.fixed_custom2_name ? record.fixed_custom2_name : '',
-        value: record.fixed_custom2_name ? String(record.fixed_custom2_amount || '') : '',
-        editableLabel: true
-      });
-      newRows.push({
-        label: record.fixed_custom3_name ? record.fixed_custom3_name : '',
-        value: record.fixed_custom3_name ? String(record.fixed_custom3_amount || '') : '',
-        editableLabel: true
-      });
       setFixedRows(newRows);
     }
   }, [record]);
   const fixedTotal = React.useMemo(() => fixedRows.reduce((sum, row) => sum + Number(row.value), 0), [fixedRows]);
+
+  // 非固定項目
+  // 控除項目
+  const [deductRows, setDeductRows] = useState([
+    { label: '勞保費', value: '', editableLabel: false },
+    { label: '健保費', value: '', editableLabel: false },
+    { label: '國保', value: '', editableLabel: false },
+    { label: '事假扣款', value: '', editableLabel: false },
+    { label: '病假扣款', value: '', editableLabel: false },
+    { label: '', value: '', editableLabel: true },
+    { label: '', value: '', editableLabel: true },
+    { label: '', value: '', editableLabel: true },
+  ]);
+  useEffect(() => {
+    if (record) {
+      const newRows = [
+        { label: '勞保費', value: '', editableLabel: false },
+        { label: '健保費', value: '', editableLabel: false },
+        { label: '國保', value: '', editableLabel: false },
+        { label: '事假扣款', value: '', editableLabel: false },
+        { label: '病假扣款', value: '', editableLabel: false },
+        { label: record.deduct_custom1_name ? record.deduct_custom1_name : '', value: record.deduct_custom1_name ? String(record.deduct_custom1_amount || '') : '', editableLabel: true },
+        { label: record.deduct_custom2_name ? record.deduct_custom2_name : '', value: record.deduct_custom2_name ? String(record.deduct_custom2_amount || '') : '', editableLabel: true },
+        { label: record.deduct_custom3_name ? record.deduct_custom3_name : '', value: record.deduct_custom3_name ? String(record.deduct_custom3_amount || '') : '', editableLabel: true },
+      ];
+      setDeductRows(newRows);
+    }
+  }, [record]);
+  const deductTotal = React.useMemo(() => deductRows.reduce((sum, row) => sum + Number(row.value), 0), [deductRows]);
+
+  // 先月分データ SalarySection用
+  const lastMonthDeductRows = record ? [
+    { label: '勞保費', value: String(record.labor_insurance), editableLabel: false },
+    { label: '健保費', value: String(record.health_insurance), editableLabel: false },
+    { label: '國保', value: String(record.national_insurance), editableLabel: false },
+    { label: '事假扣款', value: String(record.absence_deduction), editableLabel: false },
+    { label: '病假扣款', value: String(record.sick_deduction), editableLabel: false },
+    ...(record.deduct_custom1_name ? [{ label: record.deduct_custom1_name, value: String(record.deduct_custom1_amount || ''), editableLabel: true }] : []),
+    ...(record.deduct_custom2_name ? [{ label: record.deduct_custom2_name, value: String(record.deduct_custom2_amount || ''), editableLabel: true }] : []),
+    ...(record.deduct_custom3_name ? [{ label: record.deduct_custom3_name, value: String(record.deduct_custom3_amount || ''), editableLabel: true }] : []),
+  ] : [];
+  const lastMonthDeductTotal = lastMonthDeductRows.reduce((sum, row) => sum + Number(row.value), 0);
+
+  // 本月發放預覽（上月實發＋本月調整額）
+  const previewDeductRows = React.useMemo(() => {
+    const resultRows: Array<{ label: string; value: string; editableLabel: boolean }> = [];
+    deductRows.forEach(row => {
+      if (row.label !== '') {
+        if (row.editableLabel === false) {
+          const lastMonthRow = lastMonthDeductRows.find(lmRow => lmRow.label === row.label && lmRow.editableLabel === false);
+          const lastMonthValue = lastMonthRow ? Number(lastMonthRow.value) : 0;
+          const currentValue = Number(row.value) || 0;
+          resultRows.push({
+            label: row.label,
+            value: String(lastMonthValue + currentValue),
+            editableLabel: false
+          });
+        } else {
+          resultRows.push({
+            label: row.label,
+            value: row.value,
+            editableLabel: true
+          });
+        }
+      }
+    });
+    return resultRows;
+  }, [lastMonthDeductRows, deductRows]);
+  const previewDeductTotal = React.useMemo(() => {
+    return previewDeductRows.reduce((sum, row) => sum + Number(row.value), 0);
+  }, [lastMonthDeductRows, deductRows]);
+  const [variableRows, setVariableRows] = useState([
+    { label: '平日加班費', value: '', editableLabel: false },
+    { label: '休假日加班費', value: '', editableLabel: false },
+    { label: '休息日加班費', value: '', editableLabel: false },
+    { label: '國定假日加班費', value: '', editableLabel: false },
+    { label: '獎金', value: '', editableLabel: false },
+    { label: '', value: '', editableLabel: true },
+    { label: '', value: '', editableLabel: true },
+    { label: '', value: '', editableLabel: true },
+  ]);
+  useEffect(() => {
+    if (record) {
+      const newRows = [
+        { label: '平日加班費', value: '', editableLabel: false },
+        { label: '休假日加班費', value: '', editableLabel: false },
+        { label: '休息日加班費', value: '', editableLabel: false },
+        { label: '國定假日加班費', value: '', editableLabel: false },
+        { label: '獎金', value: '', editableLabel: false },
+        { label: record.variable_custom1_name ? record.variable_custom1_name : '', value: record.variable_custom1_name ? String(record.variable_custom1_amount || '') : '', editableLabel: true },
+        { label: record.variable_custom2_name ? record.variable_custom2_name : '', value: record.variable_custom2_name ? String(record.variable_custom2_amount || '') : '', editableLabel: true },
+        { label: record.variable_custom3_name ? record.variable_custom3_name : '', value: record.variable_custom3_name ? String(record.variable_custom3_amount || '') : '', editableLabel: true },
+      ];
+      setVariableRows(newRows);
+    }
+  }, [record]);
+  const variableTotal = React.useMemo(() => variableRows.reduce((sum, row) => sum + Number(row.value), 0), [variableRows]);
+
+  // 先月分データ SalarySection用
+  const lastMonthVariableRows = record ? [
+    { label: '平日加班費', value: String(record.overtime_weekday), editableLabel: false },
+    { label: '休假日加班費', value: String(record.overtime_holiday), editableLabel: false },
+    { label: '休息日加班費', value: String(record.overtime_restday), editableLabel: false },
+    { label: '國定假日加班費', value: String(record.overtime_national), editableLabel: false },
+    { label: '獎金', value: String(record.bonus), editableLabel: false },
+    ...(record.variable_custom1_name ? [{ label: record.variable_custom1_name, value: String(record.variable_custom1_amount || ''), editableLabel: true }] : []),
+    ...(record.variable_custom2_name ? [{ label: record.variable_custom2_name, value: String(record.variable_custom2_amount || ''), editableLabel: true }] : []),
+    ...(record.variable_custom3_name ? [{ label: record.variable_custom3_name, value: String(record.variable_custom3_amount || ''), editableLabel: true }] : []),
+  ] : [];
+  const lastMonthVariableTotal = lastMonthVariableRows.reduce((sum, row) => sum + Number(row.value), 0);
+
+  // 本月發放預覽（上月實發＋本月調整額）
+  const previewVariableRows = React.useMemo(() => {
+    const resultRows: Array<{ label: string; value: string; editableLabel: boolean }> = [];
+    variableRows.forEach(row => {
+      if (row.label !== '') {
+        if (row.editableLabel === false) {
+          const lastMonthRow = lastMonthVariableRows.find(lmRow => lmRow.label === row.label && lmRow.editableLabel === false);
+          const lastMonthValue = lastMonthRow ? Number(lastMonthRow.value) : 0;
+          const currentValue = Number(row.value) || 0;
+          resultRows.push({
+            label: row.label,
+            value: String(lastMonthValue + currentValue),
+            editableLabel: false
+          });
+        } else {
+          resultRows.push({
+            label: row.label,
+            value: row.value,
+            editableLabel: true
+          });
+        }
+      }
+    });
+    return resultRows;
+  }, [lastMonthVariableRows, variableRows]);
+  const previewVariableTotal = React.useMemo(() => {
+    return previewVariableRows.reduce((sum, row) => sum + Number(row.value), 0);
+  }, [lastMonthVariableRows, variableRows]);
 
 
   // 先月分データ SalarySection用
@@ -190,7 +313,7 @@ const PayrollCreatePage: React.FC = () => {
         <h1>{year}年{month}月</h1>
         <h2>薪資發放明細登錄</h2>
       </div>
-      {/* 固定薪資結構：上月→今月→調整額 */}
+  {/* 固定薪資結構：上月→今月→調整額 */}
       <Section title="固定薪資結構">
         <SalarySection
           title="上月實發"
@@ -211,12 +334,70 @@ const PayrollCreatePage: React.FC = () => {
           totalLabel="小計(A)"
           totalValue={String(fixedTotal)}
           onChange={rows => {
-            // editableLabelを元のfixedRowsからコピー
             const updatedRows = rows.map((row, idx) => ({
               ...row,
               editableLabel: fixedRows[idx]?.editableLabel ?? false
             }));
             setFixedRows(updatedRows);
+          }}
+        />
+      </Section>
+
+      {/* 非固定給与セクション：上月→今月→調整額 */}
+      <Section title="非固定支付項目">
+        <SalarySection
+          title="上月實發"
+          rows={lastMonthVariableRows}
+          subtotalLabel="小計(B)"
+          subtotalValue={String(lastMonthVariableTotal)}
+        />
+        <SalarySection
+          title="本月發放預覽"
+          rows={previewVariableRows}
+          subtotalLabel="小計(B)"
+          subtotalValue={String(previewVariableTotal)}
+        />
+        <EditableSalarySection
+          title="本月調整額"
+          rows={variableRows}
+          showTotal
+          totalLabel="小計(B)"
+          totalValue={String(variableTotal)}
+          onChange={rows => {
+            const updatedRows = rows.map((row, idx) => ({
+              ...row,
+              editableLabel: variableRows[idx]?.editableLabel ?? false
+            }));
+            setVariableRows(updatedRows);
+          }}
+        />
+      </Section>
+      {/* 控除（應代扣項目）セクション：上月→今月→調整額 */}
+      <Section title="應代扣項目">
+        <SalarySection
+          title="上月實扣"
+          rows={lastMonthDeductRows}
+          subtotalLabel="小計(C)"
+          subtotalValue={String(lastMonthDeductTotal)}
+        />
+        <SalarySection
+          title="本月代扣預覽"
+          rows={previewDeductRows}
+          subtotalLabel="小計(C)"
+          subtotalValue={String(previewDeductTotal)}
+        />
+        <EditableSalarySection
+          title="本月調整額"
+          rows={deductRows}
+          showTotal
+          totalLabel="小計(C)"
+          totalValue={String(deductTotal)}
+          onChange={rows => {
+            const updatedRows = rows.map((row, idx) => ({
+              ...row,
+              editableLabel: deductRows[idx]?.editableLabel ?? false
+            }));
+            setDeductRows(updatedRows);
           }}
         />
       </Section>
