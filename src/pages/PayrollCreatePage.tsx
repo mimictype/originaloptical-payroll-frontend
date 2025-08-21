@@ -401,6 +401,27 @@ const PayrollCreatePage: React.FC = () => {
           }}
         />
       </Section>
+      {/* 給与合計セクション：上月→今月→調整額 */}
+      <Section title="總計">
+        <SalarySection
+          title="上月實發"
+          rows={[]}
+          subtotalLabel="總計 (A+B-C)"
+          subtotalValue={String(lastMonthFixedTotal + lastMonthVariableTotal - lastMonthDeductTotal)}
+        />
+        <SalarySection
+          title="本月發放預覽"
+          rows={[]}
+          subtotalLabel="總計 (A+B-C)"
+          subtotalValue={String(previewFixedTotal + previewVariableTotal - previewDeductTotal)}
+        />
+        <SalarySection
+          title="本月發放差額"
+          rows={[]}
+          subtotalLabel="本月預定-上月實發"
+          subtotalValue={String(previewFixedTotal + previewVariableTotal - previewDeductTotal - (lastMonthFixedTotal + lastMonthVariableTotal - lastMonthDeductTotal))}
+        />
+      </Section>
     </div>
   );
 };
