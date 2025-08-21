@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams} from 'react-router-dom';
 import { fetchEmployeePayroll, fetchEmployeeLeave, CACHE_KEYS } from '../services/api';
 import { getCache } from '../utils/cache';
 import type { Record, LeaveDetail } from '../types';
@@ -11,7 +11,6 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import BackButton from '../components/BackButton';
 
 const PayrollDetailPage = () => {
-  const navigate = useNavigate();
   const { employeeId, year, month } = useParams<{
     employeeId: string;
     year: string;
@@ -145,15 +144,13 @@ const PayrollDetailPage = () => {
     );
   }
 
-  // 給与明細がなければ作成ページへ遷移
-  useEffect(() => {
-    if (!loading && !record) {
-      navigate(`/payroll-create/${employeeId}/${year}/${month}`);
-    }
-  }, [loading, record, employeeId, year, month, navigate]);
   if (!record) {
-    // 遷移中は何も表示しない
-    return null;
+    return (
+      <div className="error-container">
+        <div className="error">給与明細が見つかりませんでした</div>
+          <BackButton label='薪資發放明細査詢' navigateTo='/payroll-query'/>
+      </div>
+    );
   }
 
   return (
@@ -262,10 +259,10 @@ const PayrollDetailPage = () => {
               rows={[ 
                 { label: '請休期間開始', value: formatDate(leaveDetail.leave_start) },
                 { label: '請休期間結束', value: formatDate(leaveDetail.leave_end) },
-                { label: '經過遞延日數', value: `${leaveDetail.carryover_days}日` },
-                { label: '今年可休日數', value: `${leaveDetail.granted_days}日` },
-                { label: '今年已休日數', value: `${leaveDetail.used_days}日` },
-                { label: '今年未休日數', value: `${leaveDetail.remaining_days}日` },
+                { label: '經過遞延日數', value: `${leaveDetail.carryover_days}` },
+                { label: '今年可休日數', value: `${leaveDetail.granted_days}` },
+                { label: '今年已休日數', value: `${leaveDetail.used_days}` },
+                { label: '今年未休日數', value: `${leaveDetail.remaining_days}` },
                 ...(leaveDetail.thismonth_leave_days ? [{ label: '今月請休日', value: leaveDetail.thismonth_leave_days }] : [])
               ]}
             />
@@ -273,11 +270,11 @@ const PayrollDetailPage = () => {
               title="加班補休"
               rows={[ 
                 { label: '勞雇約定之補休期限', value: formatDate(leaveDetail.comp_expiry) },
-                { label: '至上月底止休未補休時數(I)', value: `${leaveDetail.carryover_hours}小時` },
-                { label: '本月選擇補休時數(II)', value: `${leaveDetail.granted_hours}小時` },
-                { label: '本月已補休時數(III)', value: `${leaveDetail.used_hours}小時` },
-                { label: '屆期未休補折發工資時數(IV)', value: `${leaveDetail.cashout_hours}小時` },
-                { label: '至本月止休未休補休時數(I+II-III-IV)', value: `${leaveDetail.remaining_hours}小時` }
+                { label: '至上月底止休未補休時數(I)', value: `${leaveDetail.carryover_hours}` },
+                { label: '本月選擇補休時數(II)', value: `${leaveDetail.granted_hours}` },
+                { label: '本月已補休時數(III)', value: `${leaveDetail.used_hours}` },
+                { label: '屆期未休補折發工資時數(IV)', value: `${leaveDetail.cashout_hours}` },
+                { label: '至本月止休未休補休時數(I+II-III-IV)', value: `${leaveDetail.remaining_hours}` }
               ]}
             />
           </div>
