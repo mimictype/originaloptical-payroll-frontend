@@ -1,0 +1,40 @@
+/* BackButton.css の内容を複製 */
+.m-button {
+  background: #262626;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  align-items: center;
+  min-height: 50px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.m-button:hover {
+  background-color: #868686;
+}
+
+.m-button-delete {
+  background-color: #84201e;
+}
+.m-button-delete:hover {
+  background-color: #ed3030;
+}
+
+.m-button-confirm {
+  background-color: #2b592d;
+}
+.m-button-confirm:hover {
+  background-color: #46b24b;
+}
+
+
+.m-button-create {
+  background-color: #0f416c;
+}
+.m-button-create:hover {
+  background-color: #1574d2;
+}
