@@ -25,16 +25,16 @@
 }
 
 .m-button-confirm {
-  background-color: #2b592d;
+  background-color: #122e75;
 }
 .m-button-confirm:hover {
-  background-color: #46b24b;
+  background-color: #1a40a0;
 }
 
 
 .m-button-create {
-  background-color: #0f416c;
+  background-color: #0f6e2a;
 }
 .m-button-create:hover {
-  background-color: #1574d2;
+  background-color: #138834;
 }
