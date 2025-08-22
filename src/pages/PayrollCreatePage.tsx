@@ -339,9 +339,47 @@ const PayrollCreatePage: React.FC = () => {
     if (grantedValue !== null && usedValue !== null) {
       resultRows.find(r => r.label === '今年未休日數')!.value = String(grantedValue - usedValue);
     }
-
     return resultRows;
   }, [lastMonthLeaveRows, leaveAdjustmentRows]);
+
+  // 加班補休
+  const lastMonthOvertimeRows = leaveDetail ? [
+    { label: '勞雇約定之補休期限', value: formatDate(leaveDetail.comp_expiry) },
+    { label: '至上月底止休未補休時數', value: leaveDetail.carryover_hours },
+    { label: '本月選擇補休時數', value: `${leaveDetail.granted_hours}` },
+    { label: '本月已補休時數', value: `${leaveDetail.used_hours}` },
+    { label: '屆期未休補折發工資時數', value: `${leaveDetail.cashout_hours}` },
+    { label: '至本月止休未休補休時數', value: `${leaveDetail.remaining_hours}` },
+  ] : [];
+
+  const [adjustedOvertimeRows, setAdjustedOvertimeRows] = useState([
+    { label: '勞雇約定之補休期限', value: '', editableLabel: false },
+    { label: '至上月底止休未補休時數', value: '', editableLabel: false },
+    { label: '本月選擇補休時數', value: '', editableLabel: false },
+    { label: '本月已補休時數', value: '', editableLabel: false },
+    { label: '屆期未休補折發工資時數', value: '', editableLabel: false },
+    { label: '至本月止休未休補休時數', value: '', editableLabel: false }
+  ]);
+  useEffect(() => {
+    if (leaveDetail) {
+      setAdjustedOvertimeRows([
+        { label: '勞雇約定之補休期限', value: formatDate(leaveDetail.comp_expiry), editableLabel: false },
+        { label: '至上月底止休未補休時數', value: '', editableLabel: false },
+        { label: '本月選擇補休時數', value: ``, editableLabel: false },
+        { label: '本月已補休時數', value: ``, editableLabel: false },
+        { label: '屆期未休補折發工資時數', value: ``, editableLabel: false },
+        { label: '至本月止休未休補休時數', value: ``, editableLabel: false }
+      ]);
+    }
+  }, [leaveDetail]);
+
+  const previewOvertimeRows = React.useMemo(() => {
+    return adjustedOvertimeRows.map(row => ({
+      ...row,
+      value: String(row.value)
+    }));
+  }, [adjustedOvertimeRows]);
+
   if (loading) {
         return <LoadingSpinner />;
   }
@@ -483,15 +521,16 @@ const PayrollCreatePage: React.FC = () => {
         />
       </Section>
       {leaveDetail && (
+        <>
       <Section title="特別休假">
         <SalarySection
           title="上月實績"
           rows={lastMonthLeaveRows}
-        />
+          />
         <SalarySection
           title="本月預覽"
           rows={previewLeaveRows}
-        />
+          />
         <EditableSalarySection
           title="本月調整"
           rows={leaveAdjustmentRows}
@@ -504,8 +543,32 @@ const PayrollCreatePage: React.FC = () => {
               setLeaveAdjustmentRows(updatedRows);
             }
           }
+          />
+      </Section>
+      <Section title="加班補休">
+        <SalarySection
+          title="上月實績"
+          rows={lastMonthOvertimeRows}
+        />
+        <SalarySection
+          title="本月預覽"
+          rows={previewOvertimeRows}
+        />
+        <EditableSalarySection
+          title="本月調整"
+          rows={adjustedOvertimeRows}
+          onChange={
+            (rows) => {
+              const updatedRows = rows.map((row, idx) => ({
+                ...row,
+                editableLabel: adjustedOvertimeRows[idx]?.editableLabel ?? false
+              }));
+              setAdjustedOvertimeRows(updatedRows);
+            }
+          }
         />
       </Section>
+        </>
       )}
     </div>
   );
