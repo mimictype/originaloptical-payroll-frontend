@@ -317,8 +317,10 @@ const PayrollCreatePage: React.FC = () => {
     let usedValue: number | null = null;
 
     lastMonthLeaveRows.forEach(row => {
-      if (row.label === '請休期間開始' || row.label === '請休期間結束' || row.label === '今月請休日' || row.label === '經過遞延日數') {
+      if (row.label === '請休期間開始' || row.label === '請休期間結束' || row.label === '今月請休日') {
         resultRows.push({ label: row.label, value: String(leaveAdjustmentRows.find(r => r.label === row.label)?.value) });
+      } else if (row.label === '經過遞延日數') {
+        resultRows.push({ label: row.label, value: String(leaveAdjustmentRows.find(r => r.label === row.label)?.value) || '0' });
       } else if (row.label === '今年可休日數') {
         const adjustmentRow = leaveAdjustmentRows.find(r => r.label === '經過遞延日數');
         const value = adjustmentRow ? String(Number(row.value) + Number(adjustmentRow.value)) : row.value;
@@ -329,12 +331,13 @@ const PayrollCreatePage: React.FC = () => {
         const value = adjustmentRow ? String(Number(row.value) + Number(adjustmentRow.value)) : row.value;
         resultRows.push({ label: row.label, value });
         usedValue = Number(value);
+      } else if (row.label === '今年未休日數') {
+        resultRows.push({ label: row.label, value: '0'});
       }
     });
-
     // 今年未休日數を追加
     if (grantedValue !== null && usedValue !== null) {
-      resultRows.push({ label: '今年未休日數', value: String(grantedValue - usedValue) });
+      resultRows.find(r => r.label === '今年未休日數')!.value = String(grantedValue - usedValue);
     }
 
     return resultRows;
