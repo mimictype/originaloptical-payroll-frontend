@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, type FC } from 'react';
 import { useParams } from 'react-router-dom';
 import type { LeaveDetail, Record } from '../types/index';
 import EditableSalarySection from '../components/EditableSalarySection';
@@ -9,7 +9,7 @@ import './pageStyles.css';
 import { fetchEmployeePayroll, fetchEmployeeLeave } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-const PayrollCreatePage: React.FC = () => {
+const PayrollCreatePage: FC = () => {
   // 特別休暇データ
   const [leaveDetail, setLeaveDetail] = useState<LeaveDetail | null>(null);
 
@@ -80,7 +80,7 @@ const PayrollCreatePage: React.FC = () => {
       setFixedRows(newRows);
     }
   }, [record]);
-  const fixedTotal = React.useMemo(() => fixedRows.reduce((sum, row) => sum + Number(row.value), 0), [fixedRows]);
+  const fixedTotal = useMemo(() => fixedRows.reduce((sum, row) => sum + Number(row.value), 0), [fixedRows]);
 
   // 控除項目
   const [deductRows, setDeductRows] = useState([
@@ -108,7 +108,7 @@ const PayrollCreatePage: React.FC = () => {
       setDeductRows(newRows);
     }
   }, [record]);
-  const deductTotal = React.useMemo(() => deductRows.reduce((sum, row) => sum + Number(row.value), 0), [deductRows]);
+  const deductTotal = useMemo(() => deductRows.reduce((sum, row) => sum + Number(row.value), 0), [deductRows]);
 
   // 先月分データ SalarySection用
   const lastMonthDeductRows = record ? [
@@ -124,7 +124,7 @@ const PayrollCreatePage: React.FC = () => {
   const lastMonthDeductTotal = lastMonthDeductRows.reduce((sum, row) => sum + Number(row.value), 0);
 
   // 本月發放預覽（上月實發＋本月調整額）
-  const previewDeductRows = React.useMemo(() => {
+  const previewDeductRows = useMemo(() => {
     const resultRows: Array<{ label: string; value: string; editableLabel: boolean }> = [];
     deductRows.forEach(row => {
       if (row.label !== '') {
@@ -148,7 +148,7 @@ const PayrollCreatePage: React.FC = () => {
     });
     return resultRows;
   }, [lastMonthDeductRows, deductRows]);
-  const previewDeductTotal = React.useMemo(() => {
+  const previewDeductTotal = useMemo(() => {
     return previewDeductRows.reduce((sum, row) => sum + Number(row.value), 0);
   }, [lastMonthDeductRows, deductRows]);
   const [variableRows, setVariableRows] = useState([
@@ -176,7 +176,7 @@ const PayrollCreatePage: React.FC = () => {
       setVariableRows(newRows);
     }
   }, [record]);
-  const variableTotal = React.useMemo(() => variableRows.reduce((sum, row) => sum + Number(row.value), 0), [variableRows]);
+  const variableTotal = useMemo(() => variableRows.reduce((sum, row) => sum + Number(row.value), 0), [variableRows]);
 
   // 先月分データ SalarySection用
   const lastMonthVariableRows = record ? [
@@ -192,7 +192,7 @@ const PayrollCreatePage: React.FC = () => {
   const lastMonthVariableTotal = lastMonthVariableRows.reduce((sum, row) => sum + Number(row.value), 0);
 
   // 本月發放預覽（上月實發＋本月調整額）
-  const previewVariableRows = React.useMemo(() => {
+  const previewVariableRows = useMemo(() => {
     const resultRows: Array<{ label: string; value: string; editableLabel: boolean }> = [];
     variableRows.forEach(row => {
       if (row.label !== '') {
@@ -216,7 +216,7 @@ const PayrollCreatePage: React.FC = () => {
     });
     return resultRows;
   }, [lastMonthVariableRows, variableRows]);
-  const previewVariableTotal = React.useMemo(() => {
+  const previewVariableTotal = useMemo(() => {
     return previewVariableRows.reduce((sum, row) => sum + Number(row.value), 0);
   }, [lastMonthVariableRows, variableRows]);
 
@@ -232,7 +232,7 @@ const PayrollCreatePage: React.FC = () => {
   const lastMonthFixedTotal = lastMonthFixedRows.reduce((sum, row) => sum + Number(row.value), 0);
 
   // 本月發放預覽（上月実發＋本月調整額）
-  const previewFixedRows = React.useMemo(() => {
+  const previewFixedRows = useMemo(() => {
     // ラベル: fixedRowsのrow.label !== ''のみ抽出
     // 固定項目の値: lastMonthFixedRows+fixedRowsで合算
     // カスタム項目の値: fixedRowsから取得
@@ -261,7 +261,7 @@ const PayrollCreatePage: React.FC = () => {
     });
     return resultRows;
   }, [lastMonthFixedRows, fixedRows]);
-  const previewFixedTotal = React.useMemo(() => {
+  const previewFixedTotal = useMemo(() => {
   return previewFixedRows.reduce((sum, row) => sum + Number(row.value), 0);
   }, [lastMonthFixedTotal, fixedRows]);
 // memo
@@ -311,7 +311,7 @@ const PayrollCreatePage: React.FC = () => {
     ...(leaveDetail.thismonth_leave_days ? [{ label: '今月請休日', value: leaveDetail.thismonth_leave_days }] : [])
   ] : [];
   // previewLeaveRows: ラベルごとにlastMonthLeaveRowsとleaveAdjustmentRowsを使い分けるロジック
-  const previewLeaveRows = React.useMemo(() => {
+  const previewLeaveRows = useMemo(() => {
     const resultRows: Array<{ label: string; value: string }> = [];
     let grantedValue: number | null = null;
     let usedValue: number | null = null;
@@ -373,7 +373,7 @@ const PayrollCreatePage: React.FC = () => {
     }
   }, [leaveDetail]);
 
-  const previewOvertimeRows = React.useMemo(() => {
+  const previewOvertimeRows = useMemo(() => {
     return adjustedOvertimeRows.map(row => ({
       ...row,
       value: String(row.value)
