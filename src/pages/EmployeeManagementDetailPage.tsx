@@ -5,6 +5,7 @@ import BackButton from '../components/BackButton';
 import '../components/EmployeeManagementDetailPage.css';
 import './pageStyles.css';
 import { createEmployee, updateEmployee, deleteEmployee } from '../services/api';
+import MButton from '../components/MButton';
 import { getCache } from '../utils/cache';
 
 const defaultEmployee: Partial<Employee> = {
@@ -166,25 +167,22 @@ const EmployeeManagementDetailPage = () => {
         </div>
         <div className="form-actions detail-actions">
           {mode === 'create' ? (
-            <button type="button" onClick={handleCreate} disabled={loading}>作成</button>
+            <MButton type="create" onClick={handleCreate} name="作成" />
           ) : (
-            <>
-              <button type="button" onClick={handleUpdate} disabled={loading}>更新</button>
-            </>
+            <MButton type="confirm" onClick={handleUpdate} name="更新" />
           )}
         </div>
         {mode === 'edit' && (
           <div className="delete-action-center">
-            <button
-              type="button"
-              className="delete-btn"
+            <MButton
+              type="delete"
               onClick={() => {
                 if (window.confirm('確定要刪除嗎？此操作無法復原。')) {
                   handleDelete();
                 }
               }}
-              disabled={loading}
-            >削除</button>
+              name="削除"
+            />
           </div>
         )}
         {error && <div className="error-message">{error}</div>}

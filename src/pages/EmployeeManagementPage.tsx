@@ -6,6 +6,7 @@ import type { Employee } from '../types/employee';
 import EmployeeSelect from '../components/EmployeeSelect';
 import BackButton from '../components/BackButton';
 import './pageStyles.css';
+import MButton from '../components/MButton';
 
 const EmployeeManagementPage = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -39,12 +40,6 @@ const EmployeeManagementPage = () => {
       <div className="page-header">
         <BackButton label="首頁" navigateTo="/" />
         <h2>員工管理</h2>
-        <button
-          className="create-employee"
-          onClick={() => navigate('/employee-management/create')}
-        >
-          新規作成
-        </button>
       </div>
       {error && <div className="error-message">{error}</div>}
       {/* 従業員選択コンポーネント */}
@@ -52,6 +47,7 @@ const EmployeeManagementPage = () => {
         employees={employees}
         onSelectEmployee={handleEmployeeSelect}
       />
+        <MButton name="新增" type="create" onClick={() => navigate('/employee-management/create')} />
     </div>
   );
 };
