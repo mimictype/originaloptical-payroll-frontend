@@ -1,12 +1,12 @@
 import React from 'react';
-import type { Employee } from '../types/employee';
+import type { EmployeeData } from '../types/index';
 import './styles.css';
 import './EmployeeSelect.css';
 import LoadingSpinner from './LoadingSpinner';
 
 interface EmployeeSelectProps {
-  employees: Employee[];
-  onSelectEmployee: (employee: Employee) => void;
+  employees: EmployeeData[];
+  onSelectEmployee: (employee: EmployeeData) => void;
 }
 
 const EmployeeSelect: React.FC<EmployeeSelectProps> = ({ employees, onSelectEmployee }) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
 import DateSelector from '../components/DateSelector';
@@ -7,7 +7,7 @@ import '../App.css';
 import './pageStyles.css';
 
 import { fetchEmployees } from '../services/api';
-import type { Employee } from '../types/employee';
+import type { EmployeeData } from '../types/index';
 
 
 
@@ -16,7 +16,7 @@ import type { Employee } from '../types/employee';
 const PayrollManagementPage = () => {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear() - 1911);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

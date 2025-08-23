@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { Employee } from '../types/employee';
+import type { EmployeeData} from '../types/index';
 import BackButton from '../components/BackButton';
 import EmployeeInfo from '../components/EmployeeInfo';
 import '../components/EmployeeManagementDetailPage.css';
@@ -9,7 +9,7 @@ import { createEmployee, updateEmployee, deleteEmployee } from '../services/api'
 import MButton from '../components/MButton';
 import { getCache } from '../utils/cache';
 
-const defaultEmployee: Partial<Employee> = {
+const defaultEmployee: Partial<EmployeeData> = {
   employee_id: '',
   name: '',
   user_email: '',
@@ -20,7 +20,7 @@ const defaultEmployee: Partial<Employee> = {
 const EmployeeManagementDetailPage = () => {
   const navigate = useNavigate();
   const { employee_id } = useParams<{ employee_id?: string }>();
-  const [employee, setEmployee] = useState<Partial<Employee>>(defaultEmployee);
+  const [employee, setEmployee] = useState<Partial<EmployeeData>>(defaultEmployee);
   const mode: 'create' | 'edit' = employee_id ? 'edit' : 'create';
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +32,8 @@ const EmployeeManagementDetailPage = () => {
         setLoading(true);
         setError(null);
         // まずキャッシュから取得
-        const cachedEmployees = getCache<Employee[]>("employees");
-        let found: Employee | undefined;
+        const cachedEmployees = getCache<EmployeeData[]>("employees");
+        let found: EmployeeData | undefined;
         if (cachedEmployees) {
           found = cachedEmployees.find(e => e.employee_id === employee_id);
         }
@@ -134,7 +134,7 @@ const EmployeeManagementDetailPage = () => {
           )}
       </div>
       <form className="employee-form detail-form" onSubmit={e => e.preventDefault()}>
-        <EmployeeInfo employee={employee as Employee} editable={true} showEmail={true} />
+        <EmployeeInfo employee={employee as EmployeeData} editable={true} showEmail={true} />
         <div className="form-actions detail-actions">
           {mode === 'create' ? (
             <MButton type="create" onClick={handleCreate} name="作成" />

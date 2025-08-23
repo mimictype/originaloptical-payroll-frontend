@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../App.css';
 import './pageStyles.css';
+import MButton from '../components/MButton';
+import EmployeeInfo from '../components/EmployeeInfo';
 // import { clearAllCache } from '../utils/cache';
 
 const TopPage = () => {
@@ -24,7 +26,12 @@ const TopPage = () => {
         <Link to="/payroll-management" className="button-block">
           薪資管理
         </Link>
+        <MButton name="GGG" />
+        <MButton name="新增" type="create" />
+  <MButton name="刪除" type="delete" />
+  <MButton name="確定" type="confirm" />
       </div>
+      <EmployeeInfo employee={{ id: 9, employee_id: '123', name: 'John Doe', user_email: 'john.doe@example.com', bank_name: 'Original Bank', bank_account: 1234567890 }} />
     </div>
   );
 };

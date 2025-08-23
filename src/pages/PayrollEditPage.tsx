@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import type { LeaveDetail } from '../types';
+import type { LeaveData, PayrollData } from '../types/index';
 import EditableSalarySection from '../components/EditableSalarySection';
 import SalarySection from '../components/SalarySection';
 import Section from '../components/Section';
 import BackButton from '../components/BackButton';
 import './pageStyles.css';
-import type { Record } from '../types';
 import { fetchEmployeePayroll, fetchEmployeeLeave } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -21,9 +20,9 @@ const PayrollEditPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   // APIから取得したデータ
-  const [record, setRecord] = useState<Record | null>(null);
+  const [record, setRecord] = useState<PayrollData | null>(null);
 
-  const [leaveDetail, setLeaveDetail] = useState<LeaveDetail | null>(null);
+  const [leaveDetail, setLeaveDetail] = useState<LeaveData | null>(null);
 
   // データ取得処理
   useEffect(() => {

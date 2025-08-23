@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchEmployees } from '../services/api';
 import { setCache } from '../utils/cache';
-import type { Employee } from '../types/employee';
+import type { EmployeeData } from '../types/index';
 import EmployeeSelect from '../components/EmployeeSelect';
 import BackButton from '../components/BackButton';
 import './pageStyles.css';
 import MButton from '../components/MButton';
 
 const EmployeeManagementPage = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const EmployeeManagementPage = () => {
       try {
   const data = await fetchEmployees(true);
   setEmployees(data);
-  setCache<Employee[]>("employees", data);
+  setCache<EmployeeData[]>("employees", data);
   setError(null);
       } catch (err) {
         setError('従業員データの取得に失敗しました。再読み込みをお試しください。');
@@ -31,7 +31,7 @@ const EmployeeManagementPage = () => {
   }, []);
 
   // 従業員を選択した時の処理
-  const handleEmployeeSelect = (employee: Employee) => {
+  const handleEmployeeSelect = (employee: EmployeeData) => {
     navigate(`/employee-management/${employee.employee_id}`);
   };
 

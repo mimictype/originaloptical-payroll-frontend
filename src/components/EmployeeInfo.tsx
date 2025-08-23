@@ -1,10 +1,10 @@
 import { type FC } from 'react';
 import './EmployeeInfo.css';
 import Section from './Section';
-import type { Employee } from '../types/employee';
+import type { EmployeeData } from '../types/index';
 
 interface EmployeeInfoProps {
-  employee: Employee;
+  employee: EmployeeData;
   editable?: boolean;
   showEmail?: boolean;
 }

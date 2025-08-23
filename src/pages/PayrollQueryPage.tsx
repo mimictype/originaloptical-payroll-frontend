@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EmployeeSelect from '../components/EmployeeSelect';
 import { fetchEmployees } from '../services/api';
-import type { Employee } from '../types/employee';
+import type { EmployeeData } from '../types/index';
 import DateSelector from '../components/DateSelector';
 import BackButton from '../components/BackButton';
 import './pageStyles.css';
 
 const PayrollQueryPage = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [error, setError] = useState<string | null>(null);
   
   const now = new Date();
@@ -40,7 +40,7 @@ const PayrollQueryPage = () => {
   };
 
   // 従業員を選択した時の処理
-  const handleEmployeeSelect = (employee: Employee) => {
+  const handleEmployeeSelect = (employee: EmployeeData) => {
     navigate(`/payroll/${employee.employee_id}/${selectedYear}/${selectedMonth}`);
   };
 

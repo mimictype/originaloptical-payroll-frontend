@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, type FC } from 'react';
 import { useParams } from 'react-router-dom';
-import type { LeaveDetail, Record } from '../types/index';
+import type { LeaveData, PayrollData } from '../types/index';
 import EditableSalarySection from '../components/EditableSalarySection';
 import SalarySection from '../components/SalarySection';
 import Section from '../components/Section';
@@ -11,7 +11,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const PayrollCreatePage: FC = () => {
   // 特別休暇データ
-  const [leaveDetail, setLeaveDetail] = useState<LeaveDetail | null>(null);
+  const [leaveDetail, setLeaveDetail] = useState<LeaveData | null>(null);
 
   // URLパラメータから従業員ID・年月取得
   const { employeeId, year, month } = useParams<{
@@ -23,7 +23,7 @@ const PayrollCreatePage: FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   // APIから取得したデータ
-  const [record, setRecord] = useState<Record | null>(null);
+  const [record, setRecord] = useState<PayrollData | null>(null);
 
   // データ取得処理
   useEffect(() => {

@@ -2,8 +2,7 @@ import { fetchEmployeePayroll, fetchEmployeeLeave, CACHE_KEYS } from '../service
 import { useState, useEffect } from 'react';
 import { useParams} from 'react-router-dom';
 import { getCache } from '../utils/cache';
-import type { Record, LeaveDetail } from '../types';
-import type { Employee } from '../types/employee';
+import type { PayrollData, LeaveData, EmployeeData} from '../types/index';
 import './pageStyles.css';
 import SalarySection from '../components/SalarySection';
 import Section from '../components/Section';
@@ -18,15 +17,15 @@ const PayrollDetailPage = () => {
     month: string;
   }>();
 
-  const [record, setRecord] = useState<Record | null>(null);
-  const [employee, setEmployee] = useState<Employee | null>(null);
-  const [leaveDetail, setLeaveDetail] = useState<LeaveDetail | null>(null);
+  const [record, setRecord] = useState<PayrollData | null>(null);
+  const [employee, setEmployee] = useState<EmployeeData | null>(null);
+  const [leaveDetail, setLeaveDetail] = useState<LeaveData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // キャッシュから従業員基本情報を取得する関数
-  const getEmployeeFromCache = (employeeId: string): Employee | null => {
-    const cachedEmployees = getCache<Employee[]>(CACHE_KEYS.EMPLOYEES);
+  const getEmployeeFromCache = (employeeId: string): EmployeeData | null => {
+    const cachedEmployees = getCache<EmployeeData[]>(CACHE_KEYS.EMPLOYEES);
     if (cachedEmployees) {
       return cachedEmployees.find(emp => emp.employee_id === employeeId) || null;
     }
@@ -118,7 +117,7 @@ const PayrollDetailPage = () => {
     return pay_date;
   };
 
-  const calculateTotal = (record: Record) => {
+  const calculateTotal = (record: PayrollData) => {
     return record.subtotal_A + record.subtotal_B - record.subtotal_C;
   };
 

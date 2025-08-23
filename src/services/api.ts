@@ -1,5 +1,5 @@
 // 従業員の作成
-export const createEmployee = async (payload: Partial<Employee>) => {
+export const createEmployee = async (payload: Partial<EmployeeData>) => {
   const params = new URLSearchParams();
   params.append('action', 'createemployee');
   Object.entries(payload).forEach(([key, value]) => {
@@ -16,7 +16,7 @@ export const createEmployee = async (payload: Partial<Employee>) => {
 };
 
 // 従業員の更新
-export const updateEmployee = async (payload: Partial<Employee>) => {
+export const updateEmployee = async (payload: Partial<EmployeeData>) => {
   const params = new URLSearchParams();
   params.append('action', 'updateemployee');
   Object.entries(payload).forEach(([key, value]) => {
@@ -47,8 +47,7 @@ export const deleteEmployee = async (employee_id: string) => {
   return await response.json();
 };
 // API服務的實現
-import type { Record, LeaveDetail } from '../types';
-import type { Employee, EmployeeListResponse } from '../types/employee';
+import type { PayrollData, LeaveData, EmployeeData, EmployeeListData } from '../types/index';
 import { getCache, setCache } from '../utils/cache';
 
 
@@ -64,11 +63,11 @@ export const CACHE_KEYS = {
 };
 
 // 従業員一覧を取得する関数
-export const fetchEmployees = async (useCache = true): Promise<Employee[]> => {
+export const fetchEmployees = async (useCache = true): Promise<EmployeeData[]> => {
   try {
     // Check cache first if useCache is true
     if (useCache) {
-      const cachedData = getCache<Employee[]>(CACHE_KEYS.EMPLOYEES);
+      const cachedData = getCache<EmployeeData[]>(CACHE_KEYS.EMPLOYEES);
       if (cachedData) {
         console.log('Using cached employee data');
         return cachedData;
@@ -87,7 +86,7 @@ export const fetchEmployees = async (useCache = true): Promise<Employee[]> => {
       throw new Error(`API error: ${response.status}`);
     }
     
-    const data: EmployeeListResponse = await response.json();
+    const data: EmployeeListData = await response.json();
     
     if (data.status !== 'success') {
       throw new Error('Failed to fetch employees');
@@ -104,7 +103,7 @@ export const fetchEmployees = async (useCache = true): Promise<Employee[]> => {
 };
 
 // 指定月の給与明細一覧を取得する関数（複数社員）
-export const fetchRecords = async (rocYear?: number, month?: number, useCache = true): Promise<Record[]> => {
+export const fetchRecords = async (rocYear?: number, month?: number, useCache = true): Promise<PayrollData[]> => {
   try {
     if (!rocYear || !month) {
       throw new Error('年月を指定してください');
@@ -113,7 +112,7 @@ export const fetchRecords = async (rocYear?: number, month?: number, useCache = 
     // Check cache first if useCache is true
     if (useCache) {
       const cacheKey = CACHE_KEYS.RECORDS(rocYear, month);
-      const cachedData = getCache<Record[]>(cacheKey);
+      const cachedData = getCache<PayrollData[]>(cacheKey);
       if (cachedData) {
         console.log(`Using cached records data for ${rocYear}年${month}月`);
         return cachedData;
@@ -155,12 +154,12 @@ export const fetchRecords = async (rocYear?: number, month?: number, useCache = 
 };
 
 // 特定従業員の給与明細を取得する関数
-export const fetchEmployeePayroll = async (employeeId: string, year: number, month: number, useCache = true): Promise<Record> => {
+export const fetchEmployeePayroll = async (employeeId: string, year: number, month: number, useCache = true): Promise<PayrollData> => {
   try {
     // Check cache first if useCache is true
     if (useCache) {
       const cacheKey = CACHE_KEYS.PAYROLL(employeeId, year, month);
-      const cachedData = getCache<Record>(cacheKey);
+      const cachedData = getCache<PayrollData>(cacheKey);
       if (cachedData) {
         console.log(`Using cached payroll data for ${employeeId} ${year}年${month}月`);
         return cachedData;
@@ -214,12 +213,12 @@ export const fetchEmployeePayroll = async (employeeId: string, year: number, mon
 };
 
 // 特定従業員の休暇明細を取得する関数
-export const fetchEmployeeLeave = async (employeeId: string, year: number, month: number, useCache = true): Promise<LeaveDetail> => {
+export const fetchEmployeeLeave = async (employeeId: string, year: number, month: number, useCache = true): Promise<LeaveData> => {
   try {
     // Check cache first if useCache is true
     if (useCache) {
       const cacheKey = CACHE_KEYS.LEAVE_DETAILS(employeeId, year, month);
-      const cachedData = getCache<LeaveDetail>(cacheKey);
+      const cachedData = getCache<LeaveData>(cacheKey);
       if (cachedData) {
         console.log(`Using cached leave data for ${employeeId} ${year}年${month}月`);
         return cachedData;
