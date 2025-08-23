@@ -1,6 +1,6 @@
+import { fetchEmployeePayroll, fetchEmployeeLeave, CACHE_KEYS } from '../services/api';
 import { useState, useEffect } from 'react';
 import { useParams} from 'react-router-dom';
-import { fetchEmployeePayroll, fetchEmployeeLeave, CACHE_KEYS } from '../services/api';
 import { getCache } from '../utils/cache';
 import type { Record, LeaveDetail } from '../types';
 import type { Employee } from '../types/employee';
@@ -9,6 +9,7 @@ import SalarySection from '../components/SalarySection';
 import Section from '../components/Section';
 import LoadingSpinner from '../components/LoadingSpinner';
 import BackButton from '../components/BackButton';
+import EmployeeInfo from '../components/EmployeeInfo';
 
 const PayrollDetailPage = () => {
   const { employeeId, year, month } = useParams<{
@@ -18,6 +19,7 @@ const PayrollDetailPage = () => {
   }>();
 
   const [record, setRecord] = useState<Record | null>(null);
+  const [employee, setEmployee] = useState<Employee | null>(null);
   const [leaveDetail, setLeaveDetail] = useState<LeaveDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,41 +45,21 @@ const PayrollDetailPage = () => {
         setLoading(true);
         const yearNum = parseInt(year, 10);
         const monthNum = parseInt(month, 10);
-        
-        // キャッシュから従業員の基本情報を取得（あれば）
-        const cachedEmployee = getEmployeeFromCache(employeeId);
-        
-        // 給与明細と休暇明細を並行して取得
+
+        // 給与明細・休暇明細を並行して取得
         const [payrollData, leaveData] = await Promise.allSettled([
           fetchEmployeePayroll(employeeId, yearNum, monthNum, true),
           fetchEmployeeLeave(employeeId, yearNum, monthNum, true)
         ]);
-        
+
         // 給与明細の処理
         if (payrollData.status === 'fulfilled') {
-          // もしキャッシュから基本情報が取得できた場合、APIから返された給与明細にマージ
-          let payrollRecord = payrollData.value;
-          
-          // キャッシュに従業員の基本情報があれば、そのデータで上書き
-          if (cachedEmployee) {
-            console.log('Using cached employee data for basic info');
-            // 基本情報をキャッシュから補完（nameやemailなど）
-            payrollRecord = {
-              ...payrollRecord,
-              employee_id: cachedEmployee.employee_id,
-              name: payrollRecord.name || cachedEmployee.name,
-              user_email: payrollRecord.user_email || cachedEmployee.user_email,
-              bank_name: payrollRecord.bank_name || cachedEmployee.bank_name,
-              bank_account: payrollRecord.bank_account || cachedEmployee.bank_account.toString()
-            };
-          }
-          
-          setRecord(payrollRecord);
+          setRecord(payrollData.value);
         } else {
           console.error('給与明細の取得に失敗しました', payrollData.reason);
           throw new Error('給与明細の取得に失敗しました');
         }
-        
+
         // 休暇明細の処理（失敗してもエラーにしない）
         if (leaveData.status === 'fulfilled') {
           setLeaveDetail(leaveData.value);
@@ -85,7 +67,16 @@ const PayrollDetailPage = () => {
           console.warn('休暇明細の取得に失敗しました', leaveData.reason);
           setLeaveDetail(null);
         }
-        
+
+        // キャッシュから従業員情報を取得
+        const cachedEmployee = getEmployeeFromCache(employeeId);
+        if (cachedEmployee) {
+          setEmployee(cachedEmployee);
+        } else {
+          console.warn('キャッシュから従業員情報が取得できませんでした');
+          setEmployee(null);
+        }
+
         setError(null);
       } catch (err) {
         console.error('データの取得に失敗しました', err);
@@ -162,39 +153,7 @@ const PayrollDetailPage = () => {
       </div>
 
       {/* 基本情報 セクション */}
-      <div className="payroll-section">
-        <h4 className="section-title">基本情報</h4>
-        <div className="basic-info">
-            <table className="payroll-table">
-              <tbody>
-                <tr>
-                  <td>員工ID</td>
-                  <td>{record.employee_id}</td>
-                </tr>
-                <tr>
-                  <td>姓名</td>
-                  <td>{record.name}</td>
-                </tr>
-                <tr>
-                  <td>Email</td>
-                  <td>{record.user_email}</td>
-                </tr>
-                <tr>
-                  <td>發薪日期</td>
-                  <td>{record.pay_date}</td>
-                </tr>
-                <tr>
-                  <td>銀行</td>
-                  <td>{record.bank_name}</td>
-                </tr>
-                <tr>
-                  <td>帳號</td>
-                  <td>{record.bank_account}</td>
-                </tr>
-              </tbody>
-            </table>
-        </div>
-      </div>
+      {employee ? <EmployeeInfo employee={employee} showEmail={false}/> : <div>従業員情報が取得できませんでした</div>}
 
       {/* 薪資明細 セクション */}
       <Section title="薪資明細">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { Employee } from '../types/employee';
 import BackButton from '../components/BackButton';
+import EmployeeInfo from '../components/EmployeeInfo';
 import '../components/EmployeeManagementDetailPage.css';
 import './pageStyles.css';
 import { createEmployee, updateEmployee, deleteEmployee } from '../services/api';
@@ -126,45 +127,14 @@ const EmployeeManagementDetailPage = () => {
     <div className="employee-detail-page">
       <div className="page-header">
         <BackButton label="員工管理" navigateTo="/employee-management" />
-        <h2>員工詳細</h2>
+          {mode === 'create' ? (
+            <h2>新增員工</h2>
+          ) : (
+            <h2>修改員工資料</h2>
+          )}
       </div>
       <form className="employee-form detail-form" onSubmit={e => e.preventDefault()}>
-        <div className="detail-fields">
-          <div className="detail-field-row">
-            <label htmlFor="employee_id">員工ID</label>
-            <div className="detail-value">
-              {mode === 'create' ? (
-                <input id="employee_id" name="employee_id" value={employee.employee_id || ''} onChange={handleChange} />
-              ) : (
-                <span>{employee.employee_id}</span>
-              )}
-            </div>
-          </div>
-          <div className="detail-field-row">
-            <label htmlFor="name">姓名</label>
-            <div className="detail-value">
-              <input id="name" name="name" value={employee.name || ''} onChange={handleChange} />
-            </div>
-          </div>
-          <div className="detail-field-row">
-            <label htmlFor="user_email">Email</label>
-            <div className="detail-value">
-              <input id="user_email" name="user_email" value={employee.user_email || ''} onChange={handleChange} />
-            </div>
-          </div>
-          <div className="detail-field-row">
-            <label htmlFor="bank_name">銀行</label>
-            <div className="detail-value">
-              <input id="bank_name" name="bank_name" value={employee.bank_name || ''} onChange={handleChange} />
-            </div>
-          </div>
-          <div className="detail-field-row">
-            <label htmlFor="bank_account">帳號</label>
-            <div className="detail-value">
-              <input id="bank_account" name="bank_account" value={employee.bank_account || ''} onChange={handleChange} />
-            </div>
-          </div>
-        </div>
+        <EmployeeInfo employee={employee as Employee} editable={true} showEmail={true} />
         <div className="form-actions detail-actions">
           {mode === 'create' ? (
             <MButton type="create" onClick={handleCreate} name="作成" />

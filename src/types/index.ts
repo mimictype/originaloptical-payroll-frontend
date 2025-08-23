@@ -2,12 +2,12 @@
 
 // 薪資記錄的型別
 export interface Record {
-  id: string;                   // 記錄ID
-  employee_id: string;          // 員工ID
-  user_email: string;           // 員工Email
-  name: string;                 // 姓名
-  bank_name: string;            // 銀行名稱
-  bank_account: string;         // 銀行帳號
+  // id: string;                   // 記錄ID
+  // employee_id: string;          // 員工ID
+  // user_email: string;           // 員工Email
+  // name: string;                 // 姓名
+  // bank_name: string;            // 銀行名稱
+  // bank_account: string;         // 銀行帳號
   pay_date: string;             // 發薪日期 (民國年-MM-DD)
 
   base_salary: number;          // 底薪
