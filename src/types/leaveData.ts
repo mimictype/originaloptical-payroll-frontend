@@ -6,7 +6,7 @@ export interface LeaveData {
   granted_days: number;         // 今年可休的特別休假日數（当年付与日数）
   used_days: number;            // 今年已休的特別休假日數（当年取得済み日数）
   remaining_days: number;       // 今年未休的特別休假日數（残日数）
-  thismonth_leave_days: string; // 今月特別休假的請休日（今月の予定取得日、例: "8/20,8/5"）
+  thismonth_leave_days: string; // 今月特別休假的請休日（例: "8/20,8/5"）
   comp_expiry: number;          // 勞雇雙方的定之補休期限（代休の消化期限、ROC yyyMMdd形式）
   carryover_hours: number;      // 至上月底止休未補休時數（代休の月初繰入時間）
   granted_hours: number;        // 本月選擇補休時數（今月、残業代→代休に振替した時間）
