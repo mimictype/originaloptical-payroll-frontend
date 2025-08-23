@@ -1,0 +1,21 @@
+.employee-input {
+  height: 40px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1rem;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.employee-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.employee-table td {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #eee;
+  color: #444;
+}
+.employee-table tr:last-child td {
+  border-bottom: none;
+}
