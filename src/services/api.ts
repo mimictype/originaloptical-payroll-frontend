@@ -1,3 +1,9 @@
+// API服務的實現
+import type { PayrollData, LeaveData, EmployeeData, EmployeeListData } from '../types/index';
+
+// API URL
+const API_URL = 'https://script.google.com/macros/s/AKfycbwP1du1w3CEPLMqTSsynBEjlj7mHTRfR4pdFay4BReJEFB0dy_Pp7INTeTM-Wl6qpW13Q/exec';
+
 // 従業員の作成
 export const createEmployee = async (payload: Partial<EmployeeData>) => {
   const params = new URLSearchParams();
@@ -46,13 +52,6 @@ export const deleteEmployee = async (employee_id: string) => {
   });
   return await response.json();
 };
-// API服務的實現
-import type { PayrollData, LeaveData, EmployeeData, EmployeeListData } from '../types/index';
-
-
-// API URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbwP1du1w3CEPLMqTSsynBEjlj7mHTRfR4pdFay4BReJEFB0dy_Pp7INTeTM-Wl6qpW13Q/exec';
-
 
 // 従業員一覧を取得する関数
 export const fetchEmployees = async (): Promise<EmployeeData[]> => {
@@ -101,14 +100,6 @@ export const fetchEmployeePayroll = async (employeeId: string, year: number, mon
     // APIレスポンスはすでに民国年形式なので変換不要
     // 注意: レスポンスでは "record" キーにデータが格納されている
     const record = data.record;
-    // pay_dateが数値形式(例: 1140816)の場合、文字列形式(例: "114-08-16")に変換
-    if (typeof record.pay_date === 'number') {
-      const payDateStr = record.pay_date.toString();
-      const year = payDateStr.substring(0, 3);
-      const month = payDateStr.substring(3, 5);
-      const day = payDateStr.substring(5, 7);
-      record.pay_date = `${year}-${month}-${day}`;
-    }
     return record;
   } catch (error) {
     console.error(`従業員${employeeId}の給与明細取得に失敗しました`, error);

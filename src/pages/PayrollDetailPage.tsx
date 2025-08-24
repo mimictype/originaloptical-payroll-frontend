@@ -79,11 +79,13 @@ const PayrollDetailPage = () => {
     return dateStr;
   };
 
-  const formatPayrollDate = (pay_date: string) => {
-    const match = pay_date.match(/(\d{3})-(\d{2})/);
-    if (match) {
-      const [, year, month] = match;
-      return `${year}年${parseInt(month)}月`;
+  const formatPayrollDate = (pay_date: number) => {
+    const dateStr = pay_date.toString();
+    // 民国年7桁 (例: 1140816)
+    if (dateStr.length === 7) {
+      const year = dateStr.substring(0, 3);
+      const month = dateStr.substring(3, 5).replace(/^0/, '');
+      return `${year}年${month}月`;
     }
     return pay_date;
   };
@@ -120,8 +122,8 @@ const PayrollDetailPage = () => {
         <BackButton label='薪資發放明細査詢' navigateTo='/payroll-query'/>
         <h1>傑夫眼鏡行</h1>
         <h2>{formatPayrollDate(record.pay_date)}薪資發放明細表</h2>
+        <h5>發薪日期: {formatDate(record.pay_date)}</h5>
       </div>
-
       {/* 基本情報 セクション */}
       {employee ? <EmployeeInfo employee={employee} showEmail={false}/> : <div>従業員情報が取得できませんでした</div>}
 

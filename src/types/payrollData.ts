@@ -1,5 +1,5 @@
 export interface PayrollData {
-  pay_date: string;             // 發薪日期 (民國年-MM-DD)
+  pay_date: number;             // 發薪日期 (民國年-MM-DD)
   base_salary: number;          // 底薪
   meal_allowance: number;       // 伙食津貼
   fixed_custom1_name: string;   // 固定自訂項目1名稱
