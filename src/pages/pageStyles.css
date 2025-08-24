@@ -137,16 +137,29 @@
 .payroll-detail-page {
   width: 100%;
   margin: 0;
-  padding: 0px;
+  padding: 20px;
   box-sizing: border-box;
   margin-bottom: 2rem;
 }
-
+.employee-detail-page {
+  width: 100%;
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+  margin-bottom: 2rem;
+}
+.payroll-management-page {
+  width: 100%;
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+  margin-bottom: 2rem;
+}
 /* 明細詳細ページのスタイル */
 .payroll-edit-page {
   width: 100%;
   margin: 0;
-  padding: 0px;
+  padding: 20px;
   box-sizing: border-box;
   margin-bottom: 2rem;
 }
