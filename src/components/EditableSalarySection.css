@@ -38,7 +38,7 @@
   color: #000000;
   padding: 0.3rem;
   display: inline-block;
-  width: 125%;
+  width: 115%;
 }
 
 /* value入力枠のinputスタイル */
@@ -48,7 +48,7 @@
   border-radius: 4px;
   background: #fff;
   color: #222;
-  width: 60%;
+  width: 70%;
   text-align: right;
   font-size: 1rem;
 }
@@ -60,7 +60,7 @@
   border-radius: 4px;
   background: #fff;
   color: #333;
-  width: 125%;
+  width: 115%;
   font-size: 1rem;
 }
 
@@ -72,6 +72,6 @@
   font-size: 1rem;
   background: #fff;
   color: #222;
-  width: 60%;
+  width: 70%;
   text-align: right;
 }
