@@ -7,7 +7,7 @@ import Section from '../components/Section';
 import BackButton from '../components/BackButton';
 import './pageStyles.css';
 import { getEmployeePayroll, getEmployeeLeave } from '../services/getData';
-import { updatePayroll, updateLeave } from '../services/api';
+import { updatePayroll, updateLeave, deletePayroll, deleteLeave } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 import MButton from '../components/MButton';
 
@@ -40,9 +40,37 @@ const PayrollEditPage: React.FC = () => {
         setError('保存に失敗しました。');
       } else {
         alert('修改成功');
+        window.location.href = '/';
       }
     } catch (err) {
       setError('保存に失敗しました。');
+    } finally {
+      setLoading(false);
+    }
+  };
+    // 給与明細・休暇明細の削除処理
+  const handleDelete = async () => {
+    if (!record || !leaveDetail || !employeeId || !year || !month) return;
+    setLoading(true);
+    setError(null);
+    try {
+      // API設計に合わせてIDを生成（getPayroll/getleaveと同じ形式）
+      const monthNum = parseInt(month, 10);
+      const monthStr = monthNum.toString().padStart(2, '0');
+      const deleteId = `${employeeId}_${year}${monthStr}`;
+      // 給与明細削除
+      const payrollRes = await deletePayroll(deleteId);
+      // 休暇明細削除
+      const leaveRes = await deleteLeave(deleteId);
+      if (payrollRes.status !== 'success' || leaveRes.status !== 'success') {
+        setError('削除に失敗しました。');
+      } else {
+        alert('刪除成功');
+        // 削除後は一覧ページへ遷移
+        window.location.href = '/';
+      }
+    } catch (err) {
+      setError('削除に失敗しました。');
     } finally {
       setLoading(false);
     }
@@ -345,7 +373,17 @@ const PayrollEditPage: React.FC = () => {
             />
           </div>
         </Section>
-        <MButton name="修改" type='confirm' onClick={handleSave} />
+        <div>
+          <MButton name="修改" type='confirm' onClick={handleSave} />
+        </div>
+        <div className="delete-action-center">
+
+          <MButton name="刪除" type='delete' onClick={() => {
+                if (window.confirm('確定要刪除嗎？此操作無法復原。')) {
+                  handleDelete();
+                }
+              }} />
+        </div>
         </>
       )}
     </div>

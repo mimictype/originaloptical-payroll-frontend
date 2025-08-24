@@ -169,3 +169,32 @@ export const fetchEmployeeLeave = async (employeeId: string, year: number, month
     });
     return await response.json();
   };
+  // 給与明細の削除
+  export const deletePayroll = async (id: string) => {
+    const params = new URLSearchParams();
+    params.append('action', 'deletepayroll');
+    params.append('id', id);
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+      body: params,
+    });
+    return await response.json();
+  };
+
+  // 休暇明細の削除
+  export const deleteLeave = async (id: string) => {
+    const params = new URLSearchParams();
+    params.append('action', 'deleteleave');
+    params.append('id', id);
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+      body: params,
+    });
+    return await response.json();
+  };
