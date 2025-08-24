@@ -1,5 +1,5 @@
 .back-button {
-  background: #262626;
+  background: #333;
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 8px 16px;
@@ -10,10 +10,11 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   display: inline-flex;
   align-items: center;
+  z-index: 100;
 }
 
 .back-button:hover {
-  background: #f5f5f5;
+  background: #555;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 .back-button-container {

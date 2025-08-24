@@ -278,6 +278,7 @@
 
 .button-block:hover {
   background-color: #555;
+  color: white;
   transform: translateY(-2px);
 }
 
