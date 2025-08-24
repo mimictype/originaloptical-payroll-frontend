@@ -7,7 +7,9 @@ import Section from '../components/Section';
 import BackButton from '../components/BackButton';
 import './pageStyles.css';
 import { getEmployeePayroll, getEmployeeLeave } from '../services/getData';
+import { updatePayroll, updateLeave } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import MButton from '../components/MButton';
 
 const PayrollEditPage: React.FC = () => {
   // URLパラメータから従業員ID・年月取得
@@ -24,6 +26,27 @@ const PayrollEditPage: React.FC = () => {
 
   const [leaveDetail, setLeaveDetail] = useState<LeaveData | null>(null);
 
+  // 保存ボタン押下時の処理
+  const handleSave = async () => {
+    if (!record || !leaveDetail) return;
+    setLoading(true);
+    setError(null);
+    try {
+      // 給与明細更新
+      const payrollRes = await updatePayroll(record);
+      // 休暇明細更新
+      const leaveRes = await updateLeave(leaveDetail);
+      if (payrollRes.status !== 'success' || leaveRes.status !== 'success') {
+        setError('保存に失敗しました。');
+      } else {
+        alert('修改成功');
+      }
+    } catch (err) {
+      setError('保存に失敗しました。');
+    } finally {
+      setLoading(false);
+    }
+  };
   // データ取得処理
   useEffect(() => {
     const getPayrollDetail = async () => {
@@ -54,13 +77,29 @@ const PayrollEditPage: React.FC = () => {
   const handleLeaveChange = (rows: Array<{ label: string; value: string }>) => {
     setLeaveDetail(prev => prev ? {
       ...prev,
+      // 0: leave_start, 1: leave_end, 2: carryover_days, 3: granted_days, 4: used_days, 5: remaining_days, 6: thismonth_leave_days
+      leave_start: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : prev.leave_start,
+      leave_end: rows[1]?.value ? Number(rows[1].value.replace(/-/g, '')) : prev.leave_end,
       carryover_days: Number(rows[2]?.value) || 0,
       granted_days: Number(rows[3]?.value) || 0,
       used_days: Number(rows[4]?.value) || 0,
-      // 他の項目も必要なら追加
+      remaining_days: Number(rows[5]?.value) || (prev.carryover_days + prev.granted_days - prev.used_days),
+      thismonth_leave_days: rows[6]?.value || prev.thismonth_leave_days,
     } : prev);
   };
-
+  // 加班補休編集時のコールバック
+  const handleCompLeaveChange = (rows: Array<{ label: string; value: string }>) => {
+    setLeaveDetail(prev => prev ? {
+      ...prev,
+      // 0: comp_expiry, 1: carryover_hours, 2: granted_hours, 3: used_hours, 4: cashout_hours, 5: remaining_hours
+      comp_expiry: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : prev.comp_expiry,
+      carryover_hours: Number(rows[1]?.value) || 0,
+      granted_hours: Number(rows[2]?.value) || 0,
+      used_hours: Number(rows[3]?.value) || 0,
+      cashout_hours: Number(rows[4]?.value) || 0,
+      remaining_hours: Number(rows[5]?.value) || (prev.carryover_hours + prev.granted_hours - prev.used_hours - prev.cashout_hours),
+    } : prev);
+  };
 
   // EditableSalarySectionのonChange用コールバック
   const handleFixedChange = (rows: Array<{ label: string; value: string }>) => {
@@ -68,8 +107,11 @@ const PayrollEditPage: React.FC = () => {
       ...prev,
       base_salary: Number(rows[0]?.value) || 0,
       meal_allowance: Number(rows[1]?.value) || 0,
+      fixed_custom1_name: rows[2]?.label || '',
       fixed_custom1_amount: Number(rows[2]?.value) || 0,
+      fixed_custom2_name: rows[3]?.label || '',
       fixed_custom2_amount: Number(rows[3]?.value) || 0,
+      fixed_custom3_name: rows[4]?.label || '',
       fixed_custom3_amount: Number(rows[4]?.value) || 0,
     }) : prev);
   };
@@ -82,8 +124,11 @@ const PayrollEditPage: React.FC = () => {
       overtime_restday: Number(rows[2]?.value) || 0,
       overtime_national: Number(rows[3]?.value) || 0,
       bonus: Number(rows[4]?.value) || 0,
+      variable_custom1_name: rows[5]?.label || '',
       variable_custom1_amount: Number(rows[5]?.value) || 0,
+      variable_custom2_name: rows[6]?.label || '',
       variable_custom2_amount: Number(rows[6]?.value) || 0,
+      variable_custom3_name: rows[7]?.label || '',
       variable_custom3_amount: Number(rows[7]?.value) || 0,
     }) : prev);
   };
@@ -96,9 +141,20 @@ const PayrollEditPage: React.FC = () => {
       national_insurance: Number(rows[2]?.value) || 0,
       absence_deduction: Number(rows[3]?.value) || 0,
       sick_deduction: Number(rows[4]?.value) || 0,
+      deduct_custom1_name: rows[5]?.label || '',
       deduct_custom1_amount: Number(rows[5]?.value) || 0,
+      deduct_custom2_name: rows[6]?.label || '',
       deduct_custom2_amount: Number(rows[6]?.value) || 0,
+      deduct_custom3_name: rows[7]?.label || '',
       deduct_custom3_amount: Number(rows[7]?.value) || 0,
+    }) : prev);
+  };
+
+  // 発薪日期編集用コールバック
+  const handlePayDateChange = (rows: Array<{ label: string; value: string }>) => {
+    setRecord(prev => prev ? ({
+      ...prev,
+      pay_date: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : prev.pay_date,
     }) : prev);
   };
 
@@ -213,11 +269,18 @@ const PayrollEditPage: React.FC = () => {
     <div className="payroll-edit-page">
       <div className="navigation-header">
         <BackButton label="薪資管理" navigateTo="/payroll-management" />
-        <h1>{record.pay_date}</h1>
+        <h1>{year}年{month}月</h1>
         <h2>薪資發放明細修改</h2>
       </div>
 
       <Section title="薪資明細">
+          <EditableSalarySection
+            title=""
+            rows={[ 
+              { label: '發薪日期', value: String(formatDate(record.pay_date))},
+            ]}
+            onChange={handlePayDateChange}
+          />
         <EditableSalarySection
           title="固定薪資結構"
           rows={fixedRows}
@@ -252,6 +315,7 @@ const PayrollEditPage: React.FC = () => {
 
       {/* 休暇明細 セクション（可編集） */}
       {leaveDetail && (
+        <>
         <Section title="休假明細">
           <div className="leave-details">
             <EditableSalarySection
@@ -277,9 +341,12 @@ const PayrollEditPage: React.FC = () => {
                 { label: '屆期未休補折發工資時數', value: String(leaveDetail.cashout_hours), editableLabel: false },
                 { label: '至本月止休未休補休時數', value: String(leaveDetail.remaining_hours), editableLabel: false },
               ]}
+              onChange={handleCompLeaveChange}
             />
           </div>
         </Section>
+        <MButton name="修改" type='confirm' onClick={handleSave} />
+        </>
       )}
     </div>
   );

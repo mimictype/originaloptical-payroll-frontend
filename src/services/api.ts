@@ -135,3 +135,37 @@ export const fetchEmployeeLeave = async (employeeId: string, year: number, month
     throw error;
   }
 };
+
+  // 給与明細の更新
+  export const updatePayroll = async (payload: Partial<PayrollData>) => {
+    const params = new URLSearchParams();
+    params.append('action', 'updatepayroll');
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) params.append(key, String(value));
+    });
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+      body: params,
+    });
+    return await response.json();
+  };
+
+  // 休暇明細の更新
+  export const updateLeave = async (payload: Partial<LeaveData>) => {
+    const params = new URLSearchParams();
+    params.append('action', 'updateleave');
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) params.append(key, String(value));
+    });
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+      body: params,
+    });
+    return await response.json();
+  };
