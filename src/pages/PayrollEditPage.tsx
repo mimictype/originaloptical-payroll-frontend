@@ -343,7 +343,6 @@ const PayrollEditPage: React.FC = () => {
 
       {/* 休暇明細 セクション（可編集） */}
       {leaveDetail && (
-        <>
         <Section title="休假明細">
           <div className="leave-details">
             <EditableSalarySection
@@ -373,6 +372,7 @@ const PayrollEditPage: React.FC = () => {
             />
           </div>
         </Section>
+      )}
         <div>
           <MButton name="修改" type='confirm' onClick={handleSave} />
         </div>
@@ -384,8 +384,6 @@ const PayrollEditPage: React.FC = () => {
                 }
               }} />
         </div>
-        </>
-      )}
     </div>
   );
 };
