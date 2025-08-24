@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchEmployees } from '../services/api';
-import { setCache } from '../utils/cache';
+import { getEmployees } from '../services/getData';
 import type { EmployeeData } from '../types/index';
 import EmployeeSelect from '../components/EmployeeSelect';
 import BackButton from '../components/BackButton';
@@ -16,18 +15,16 @@ const EmployeeManagementPage = () => {
 
   // 従業員データの読み込み
   useEffect(() => {
-    const getEmployees = async () => {
+    const fetchEmployeesData = async () => {
       try {
-  const data = await fetchEmployees(true);
-  setEmployees(data);
-  setCache<EmployeeData[]>("employees", data);
-  setError(null);
+        const data = await getEmployees();
+        setEmployees(data);
+        setError(null);
       } catch (err) {
         setError('従業員データの取得に失敗しました。再読み込みをお試しください。');
-      } finally {
       }
     };
-    getEmployees();
+    fetchEmployeesData();
   }, []);
 
   // 従業員を選択した時の処理

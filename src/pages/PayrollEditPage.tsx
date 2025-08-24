@@ -6,7 +6,7 @@ import SalarySection from '../components/SalarySection';
 import Section from '../components/Section';
 import BackButton from '../components/BackButton';
 import './pageStyles.css';
-import { fetchEmployeePayroll, fetchEmployeeLeave } from '../services/api';
+import { getEmployeePayroll, getEmployeeLeave } from '../services/getData';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const PayrollEditPage: React.FC = () => {
@@ -36,20 +36,11 @@ const PayrollEditPage: React.FC = () => {
         setLoading(true);
         const yearNum = parseInt(year, 10);
         const monthNum = parseInt(month, 10);
-        const [payrollData, leaveData] = await Promise.allSettled([
-          fetchEmployeePayroll(employeeId, yearNum, monthNum, true),
-          fetchEmployeeLeave(employeeId, yearNum, monthNum, true)
-        ]);
-        if (payrollData.status === 'fulfilled') {
-          setRecord(payrollData.value);
-        } else {
-          setError('給与明細の取得に失敗しました');
-        }
-        if (leaveData.status === 'fulfilled') {
-          setLeaveDetail(leaveData.value);
-        } else {
-          setLeaveDetail(null);
-        }
+        // getData.tsの関数を利用
+        const payrollData = await getEmployeePayroll(employeeId, yearNum, monthNum);
+        const leaveData = await getEmployeeLeave(employeeId, yearNum, monthNum);
+        setRecord(payrollData);
+        setLeaveDetail(leaveData);
         setError(null);
       } catch (err) {
         setError('データの取得に失敗しました。再読み込みをお試しください。');

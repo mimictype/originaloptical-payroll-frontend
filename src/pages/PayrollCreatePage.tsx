@@ -6,7 +6,7 @@ import SalarySection from '../components/SalarySection';
 import Section from '../components/Section';
 import BackButton from '../components/BackButton';
 import './pageStyles.css';
-import { fetchEmployeePayroll, fetchEmployeeLeave } from '../services/api';
+import { getEmployeePayroll, getEmployeeLeave } from '../services/getData';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const PayrollCreatePage: FC = () => {
@@ -44,10 +44,9 @@ const PayrollCreatePage: FC = () => {
         } else {
           monthNum -= 1;
         }
-        const [payrollData, leaveData] = await Promise.all([
-          fetchEmployeePayroll(employeeId, yearNum, monthNum, true),
-          fetchEmployeeLeave(employeeId, yearNum, monthNum, true)
-        ]);
+        // getData.tsの関数を利用
+        const payrollData = await getEmployeePayroll(employeeId, yearNum, monthNum);
+        const leaveData = await getEmployeeLeave(employeeId, yearNum, monthNum);
         setRecord(payrollData);
         setLeaveDetail(leaveData);
         setError(null);

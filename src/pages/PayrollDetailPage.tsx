@@ -1,7 +1,6 @@
-import { fetchEmployeePayroll, fetchEmployeeLeave, CACHE_KEYS } from '../services/api';
+import { getEmployeePayroll, getEmployeeLeave, getEmployee } from '../services/getData';
 import { useState, useEffect } from 'react';
 import { useParams} from 'react-router-dom';
-import { getCache } from '../utils/cache';
 import type { PayrollData, LeaveData, EmployeeData} from '../types/index';
 import './pageStyles.css';
 import SalarySection from '../components/SalarySection';
@@ -23,15 +22,6 @@ const PayrollDetailPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // キャッシュから従業員基本情報を取得する関数
-  const getEmployeeFromCache = (employeeId: string): EmployeeData | null => {
-    const cachedEmployees = getCache<EmployeeData[]>(CACHE_KEYS.EMPLOYEES);
-    if (cachedEmployees) {
-      return cachedEmployees.find(emp => emp.employee_id === employeeId) || null;
-    }
-    return null;
-  };
-
   useEffect(() => {
     const getPayrollDetail = async () => {
       if (!employeeId || !year || !month) {
@@ -39,43 +29,25 @@ const PayrollDetailPage = () => {
         setLoading(false);
         return;
       }
-
       try {
         setLoading(true);
         const yearNum = parseInt(year, 10);
         const monthNum = parseInt(month, 10);
-
         // 給与明細・休暇明細を並行して取得
-        const [payrollData, leaveData] = await Promise.allSettled([
-          fetchEmployeePayroll(employeeId, yearNum, monthNum, true),
-          fetchEmployeeLeave(employeeId, yearNum, monthNum, true)
+        const [payrollData, leaveData] = await Promise.all([
+          getEmployeePayroll(employeeId, yearNum, monthNum),
+          getEmployeeLeave(employeeId, yearNum, monthNum)
         ]);
-
-        // 給与明細の処理
-        if (payrollData.status === 'fulfilled') {
-          setRecord(payrollData.value);
+        setRecord(payrollData);
+        setLeaveDetail(leaveData);
+        // 従業員情報を取得
+        const employee = await getEmployee(employeeId);
+        if (employee) {
+          setEmployee(employee);
         } else {
-          console.error('給与明細の取得に失敗しました', payrollData.reason);
-          throw new Error('給与明細の取得に失敗しました');
-        }
-
-        // 休暇明細の処理（失敗してもエラーにしない）
-        if (leaveData.status === 'fulfilled') {
-          setLeaveDetail(leaveData.value);
-        } else {
-          console.warn('休暇明細の取得に失敗しました', leaveData.reason);
-          setLeaveDetail(null);
-        }
-
-        // キャッシュから従業員情報を取得
-        const cachedEmployee = getEmployeeFromCache(employeeId);
-        if (cachedEmployee) {
-          setEmployee(cachedEmployee);
-        } else {
-          console.warn('キャッシュから従業員情報が取得できませんでした');
+          console.warn('従業員情報が取得できませんでした');
           setEmployee(null);
         }
-
         setError(null);
       } catch (err) {
         console.error('データの取得に失敗しました', err);
@@ -84,7 +56,6 @@ const PayrollDetailPage = () => {
         setLoading(false);
       }
     };
-
     getPayrollDetail();
   }, [employeeId, year, month]);
 

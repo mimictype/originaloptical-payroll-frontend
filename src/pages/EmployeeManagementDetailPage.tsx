@@ -6,6 +6,7 @@ import EmployeeInfo from '../components/EmployeeInfo';
 import '../components/EmployeeManagementDetailPage.css';
 import './pageStyles.css';
 import { createEmployee, updateEmployee, deleteEmployee } from '../services/api';
+import { getEmployee } from '../services/getData';
 import MButton from '../components/MButton';
 import { getCache } from '../utils/cache';
 
@@ -44,10 +45,9 @@ const EmployeeManagementDetailPage = () => {
         }
         // キャッシュにない場合はAPI
         try {
-          const employees = await import('../services/api').then(mod => mod.fetchEmployees(false));
-          const foundApi = employees.find(e => e.employee_id === employee_id);
-          if (foundApi) {
-            setEmployee(foundApi);
+          const employee = await getEmployee(employee_id);
+          if (employee) {
+            setEmployee(employee);
           } else {
             setError('従業員が見つかりません');
           }

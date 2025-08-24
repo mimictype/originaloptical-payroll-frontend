@@ -6,12 +6,8 @@ import EmployeeSelect from '../components/EmployeeSelect';
 import '../App.css';
 import './pageStyles.css';
 
-import { fetchEmployees } from '../services/api';
+import { getEmployees, getEmployeePayroll } from '../services/getData';
 import type { EmployeeData } from '../types/index';
-
-
-
-
 
 const PayrollManagementPage = () => {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear() - 1911);
@@ -20,16 +16,16 @@ const PayrollManagementPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadEmployees = async () => {
-      setError(null);
+    const fetchEmployeesData = async () => {
       try {
-        const data = await fetchEmployees(true); // キャッシュ優先
+        const data = await getEmployees();
         setEmployees(data);
+        setError(null);
       } catch (err) {
         setError('従業員データの取得に失敗しました');
       }
     };
-    loadEmployees();
+    fetchEmployeesData();
   }, []);
 
   const handleDateChange = (year: number, month: number) => {
@@ -42,8 +38,8 @@ const PayrollManagementPage = () => {
   const handleSelectEmployee = async (employee: any) => {
     if (employee && employee.employee_id && selectedYear && selectedMonth) {
       try {
-        // 給与データの有無をAPIで確認
-        const payroll = await import('../services/api').then(mod => mod.fetchEmployeePayroll(employee.employee_id, selectedYear, selectedMonth, true));
+        // 給与データの有無をキャッシュ優先で確認
+        const payroll = await getEmployeePayroll(employee.employee_id, selectedYear, selectedMonth);
         if (payroll) {
           navigate(`/payroll-edit/${employee.employee_id}/${selectedYear}/${selectedMonth}`);
         } else {

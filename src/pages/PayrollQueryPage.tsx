@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EmployeeSelect from '../components/EmployeeSelect';
-import { fetchEmployees } from '../services/api';
+import { getEmployees } from '../services/getData';
 import type { EmployeeData } from '../types/index';
 import DateSelector from '../components/DateSelector';
 import BackButton from '../components/BackButton';
@@ -23,7 +23,7 @@ const PayrollQueryPage = () => {
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const data = await fetchEmployees();
+          const data = await getEmployees();
           setEmployees(data);
         } catch (err: any) {
           setError('従業員データの取得に失敗しました');
