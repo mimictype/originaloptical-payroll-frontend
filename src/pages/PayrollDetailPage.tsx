@@ -204,8 +204,8 @@ const PayrollDetailPage = () => {
                 { label: '至上月底止休未補休時數(I)', value: `${leaveDetail.carryover_hours}` },
                 { label: '本月選擇補休時數(II)', value: `${leaveDetail.granted_hours}` },
                 { label: '本月已補休時數(III)', value: `${leaveDetail.used_hours}` },
-                { label: '屆期未休補折發工資時數(IV)', value: `${leaveDetail.cashout_hours}` },
-                { label: '至本月止休未休補休時數(I+II-III-IV)', value: `${leaveDetail.remaining_hours}` }
+                { label: '未休補折發工資時數(IV)', value: `${leaveDetail.cashout_hours}` },
+                { label: '休未休補休時數(I+II-III-IV)', value: `${leaveDetail.remaining_hours}` }
               ]}
             />
           </div>

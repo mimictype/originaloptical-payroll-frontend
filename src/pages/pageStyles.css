@@ -106,7 +106,7 @@
 .employee-list-page {
   width: 100%;
   margin: 0;
-  padding: 20px;
+  padding: 10px;
   box-sizing: border-box;
 }
 
@@ -137,21 +137,21 @@
 .payroll-detail-page {
   width: 100%;
   margin: 0;
-  padding: 20px;
+  padding: 10px;
   box-sizing: border-box;
   margin-bottom: 2rem;
 }
 .employee-detail-page {
   width: 100%;
   margin: 0;
-  padding: 20px;
+  padding: 10px;
   box-sizing: border-box;
   margin-bottom: 2rem;
 }
 .payroll-management-page {
   width: 100%;
   margin: 0;
-  padding: 20px;
+  padding: 10px;
   box-sizing: border-box;
   margin-bottom: 2rem;
 }
@@ -159,7 +159,7 @@
 .payroll-edit-page {
   width: 100%;
   margin: 0;
-  padding: 20px;
+  padding: 10px;
   box-sizing: border-box;
   margin-bottom: 2rem;
 }
