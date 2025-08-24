@@ -36,12 +36,9 @@
 /* 編集不可ラベルのspanスタイル */
 .readonly-label {
   color: #000000;
-  font-style: italic;
-  font-size: 1rem;
   padding: 0.3rem;
   display: inline-block;
-  font-weight: bold;
-  width: 130%;
+  width: 125%;
 }
 
 /* value入力枠のinputスタイル */
@@ -49,11 +46,11 @@
   padding: 0.3rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 1rem;
   background: #fff;
   color: #222;
-  width: 50%;
+  width: 60%;
   text-align: right;
+  font-size: 1rem;
 }
 
 /* 編集可能ラベルのinputスタイル */
@@ -61,11 +58,10 @@
   padding: 0.3rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 1rem;
   background: #fff;
   color: #333;
-  font-weight: bold;
-  width: 130%;
+  width: 125%;
+  font-size: 1rem;
 }
 
 .payroll-table tr:last-child td {
@@ -76,6 +72,6 @@
   font-size: 1rem;
   background: #fff;
   color: #222;
-  width: 50%;
+  width: 60%;
   text-align: right;
 }
