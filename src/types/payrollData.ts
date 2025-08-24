@@ -1,4 +1,5 @@
 export interface PayrollData {
+  id: string;                  // 給与明細ID（従業員ID_年月）
   pay_date: number;             // 發薪日期 (民國年-MM-DD)
   base_salary: number;          // 底薪
   meal_allowance: number;       // 伙食津貼

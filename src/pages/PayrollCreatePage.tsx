@@ -8,6 +8,8 @@ import BackButton from '../components/BackButton';
 import './pageStyles.css';
 import { getEmployeePayroll, getEmployeeLeave } from '../services/getData';
 import LoadingSpinner from '../components/LoadingSpinner';
+import MButton from '../components/MButton';
+import { createLeave, createPayroll } from '../services/api';
 
 const PayrollCreatePage: FC = () => {
   // 特別休暇データ
@@ -24,6 +26,134 @@ const PayrollCreatePage: FC = () => {
   const [error, setError] = useState<string | null>(null);
   // APIから取得したデータ
   const [record, setRecord] = useState<PayrollData | null>(null);
+
+    // 登錄ボタン押下時の処理
+    const handleCreate = async () => {
+      if (!record || !leaveDetail) return;
+      setLoading(true);
+      setError(null);
+      try {
+        // previewRowsからAPI型にマッピング
+        const payrollPayload: Partial<PayrollData> = {
+          id: employeeId && year && month ? `${employeeId}_${year}${month.padStart(2, '0')}` : undefined,
+          pay_date: record.pay_date,
+          // 固定項目
+          base_salary: Number(previewFixedRows.find(r => r.label === '底薪')?.value || 0),
+          meal_allowance: Number(previewFixedRows.find(r => r.label === '伙食津貼')?.value || 0),
+          // カスタム項目（ラベルが空ならセットしない）
+          ...(previewFixedRows.find(r => r.editableLabel && r.label)
+            ? {
+                fixed_custom1_name: previewFixedRows.find(r => r.editableLabel && r.label)?.label,
+                fixed_custom1_amount: Number(previewFixedRows.find(r => r.editableLabel && r.label)?.value || 0),
+              }
+            : {}),
+          ...(previewFixedRows.filter(r => r.editableLabel && r.label).length > 1
+            ? {
+                fixed_custom2_name: previewFixedRows.filter(r => r.editableLabel && r.label)[1]?.label,
+                fixed_custom2_amount: Number(previewFixedRows.filter(r => r.editableLabel && r.label)[1]?.value || 0),
+              }
+            : {}),
+          ...(previewFixedRows.filter(r => r.editableLabel && r.label).length > 2
+            ? {
+                fixed_custom3_name: previewFixedRows.filter(r => r.editableLabel && r.label)[2]?.label,
+                fixed_custom3_amount: Number(previewFixedRows.filter(r => r.editableLabel && r.label)[2]?.value || 0),
+              }
+            : {}),
+          // 非固定項目
+          overtime_weekday: Number(previewVariableRows.find(r => r.label === '平日加班費')?.value || 0),
+          overtime_holiday: Number(previewVariableRows.find(r => r.label === '休假日加班費')?.value || 0),
+          overtime_restday: Number(previewVariableRows.find(r => r.label === '休息日加班費')?.value || 0),
+          overtime_national: Number(previewVariableRows.find(r => r.label === '國定假日加班費')?.value || 0),
+          bonus: Number(previewVariableRows.find(r => r.label === '獎金')?.value || 0),
+          // 非固定カスタム項目（ラベルが空ならセットしない）
+          ...(previewVariableRows.find(r => r.editableLabel && r.label)
+            ? {
+                variable_custom1_name: previewVariableRows.find(r => r.editableLabel && r.label)?.label,
+                variable_custom1_amount: Number(previewVariableRows.find(r => r.editableLabel && r.label)?.value || 0),
+              }
+            : {}),
+          ...(previewVariableRows.filter(r => r.editableLabel && r.label).length > 1
+            ? {
+                variable_custom2_name: previewVariableRows.filter(r => r.editableLabel && r.label)[1]?.label,
+                variable_custom2_amount: Number(previewVariableRows.filter(r => r.editableLabel && r.label)[1]?.value || 0),
+              }
+            : {}),
+          ...(previewVariableRows.filter(r => r.editableLabel && r.label).length > 2
+            ? {
+                variable_custom3_name: previewVariableRows.filter(r => r.editableLabel && r.label)[2]?.label,
+                variable_custom3_amount: Number(previewVariableRows.filter(r => r.editableLabel && r.label)[2]?.value || 0),
+              }
+            : {}),
+          // 控除項目
+          labor_insurance: Number(previewDeductRows.find(r => r.label === '勞保費')?.value || 0),
+          health_insurance: Number(previewDeductRows.find(r => r.label === '健保費')?.value || 0),
+          national_insurance: Number(previewDeductRows.find(r => r.label === '國保')?.value || 0),
+          absence_deduction: Number(previewDeductRows.find(r => r.label === '事假扣款')?.value || 0),
+          sick_deduction: Number(previewDeductRows.find(r => r.label === '病假扣款')?.value || 0),
+          // 控除カスタム項目（ラベルが空ならセットしない）
+          ...(previewDeductRows.find(r => r.editableLabel && r.label)
+            ? {
+                deduct_custom1_name: previewDeductRows.find(r => r.editableLabel && r.label)?.label,
+                deduct_custom1_amount: Number(previewDeductRows.find(r => r.editableLabel && r.label)?.value || 0),
+              }
+            : {}),
+          ...(previewDeductRows.filter(r => r.editableLabel && r.label).length > 1
+            ? {
+                deduct_custom2_name: previewDeductRows.filter(r => r.editableLabel && r.label)[1]?.label,
+                deduct_custom2_amount: Number(previewDeductRows.filter(r => r.editableLabel && r.label)[1]?.value || 0),
+              }
+            : {}),
+          ...(previewDeductRows.filter(r => r.editableLabel && r.label).length > 2
+            ? {
+                deduct_custom3_name: previewDeductRows.filter(r => r.editableLabel && r.label)[2]?.label,
+                deduct_custom3_amount: Number(previewDeductRows.filter(r => r.editableLabel && r.label)[2]?.value || 0),
+              }
+            : {}),
+        };
+
+        // 休暇明細ペイロード作成
+        const leavePayload: Partial<LeaveData> = {
+          // IDは従業員ID_年月（民国年+月）形式で生成（URLパラメータのyearとmonthを使用）
+          id: employeeId && year && month ? `${employeeId}_${year}${month.padStart(2, '0')}` : undefined,
+          leave_start: previewLeaveRows.find(r => r.label === '請休期間開始')?.value
+            ? Number(previewLeaveRows.find(r => r.label === '請休期間開始')!.value.replace(/-/g, ''))
+            : 0,
+          leave_end: previewLeaveRows.find(r => r.label === '請休期間結束')?.value
+            ? Number(previewLeaveRows.find(r => r.label === '請休期間結束')!.value.replace(/-/g, ''))
+            : 0,
+          carryover_days: Number(previewLeaveRows.find(r => r.label === '經過遞延日數')?.value || 0),
+          granted_days: Number(previewLeaveRows.find(r => r.label === '今年可休日數')?.value || 0),
+          used_days: Number(previewLeaveRows.find(r => r.label === '今年已休日數')?.value || 0),
+          remaining_days: Number(previewLeaveRows.find(r => r.label === '今年未休日數')?.value || 0),
+          thismonth_leave_days: previewLeaveRows.find(r => r.label === '今月請休日')?.value || '',
+          comp_expiry: previewOvertimeRows.find(r => r.label === '勞雇約定之補休期限')?.value
+            ? Number(previewOvertimeRows.find(r => r.label === '勞雇約定之補休期限')!.value.replace(/-/g, ''))
+            : 0,
+          carryover_hours: Number(previewOvertimeRows.find(r => r.label === '至上月底止休未補休時數')?.value || 0),
+          granted_hours: Number(previewOvertimeRows.find(r => r.label === '本月選擇補休時數')?.value || 0),
+          used_hours: Number(previewOvertimeRows.find(r => r.label === '本月已補休時數')?.value || 0),
+          cashout_hours: Number(previewOvertimeRows.find(r => r.label === '屆期未休補折發工資時數')?.value || 0),
+          remaining_hours: Number(previewOvertimeRows.find(r => r.label === '至本月止休未休補休時數')?.value || 0),
+        };
+
+        // 給与明細作成
+        const payrollRes = await createPayroll(payrollPayload);
+        // 休暇明細作成
+        const leaveRes = await createLeave(leavePayload);
+        if (payrollRes.status !== 'success' || leaveRes.status !== 'success') {
+          setError(
+            `作成に失敗しました。\n給与: ${payrollRes.error || JSON.stringify(payrollRes)}\n休暇: ${leaveRes.error || JSON.stringify(leaveRes)}`
+          );
+        } else {
+          alert('登錄成功');
+          window.location.href = '/PayrollManagement';
+        }
+      } catch (err) {
+        setError('作成に失敗しました。');
+      } finally {
+        setLoading(false);
+      }
+    };
 
   // データ取得処理
   useEffect(() => {
@@ -279,6 +409,14 @@ const PayrollCreatePage: FC = () => {
     return dateStr;
   };
 
+  // 発薪日期編集用コールバック
+  const handlePayDateChange = (rows: Array<{ label: string; value: string }>) => {
+    setRecord(prev => prev ? ({
+      ...prev,
+      pay_date: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : prev.pay_date,
+    }) : prev);
+  };
+
   // 特別休暇調整額 rows
   const [leaveAdjustmentRows, setLeaveAdjustmentRows] = useState([
     { label: '請休期間開始', value: '', editableLabel: false },
@@ -410,6 +548,13 @@ const PayrollCreatePage: FC = () => {
         <h1>{year}年{month}月</h1>
         <h2>薪資發放明細登錄</h2>
       </div>
+          <EditableSalarySection
+            title=""
+            rows={[ 
+              { label: '發薪日期', value: String(formatDate(record.pay_date))},
+            ]}
+            onChange={handlePayDateChange}
+          />
   {/* 固定薪資結構：上月→今月→調整額 */}
       <Section title="固定薪資結構">
         <SalarySection
@@ -569,6 +714,9 @@ const PayrollCreatePage: FC = () => {
       </Section>
         </>
       )}
+      <div>
+        <MButton name="登錄" type='confirm' onClick={handleCreate} />
+      </div>
     </div>
   );
 };
