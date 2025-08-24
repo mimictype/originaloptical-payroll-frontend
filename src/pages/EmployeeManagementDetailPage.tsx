@@ -23,14 +23,12 @@ const EmployeeManagementDetailPage = () => {
   const { employee_id } = useParams<{ employee_id?: string }>();
   const [employee, setEmployee] = useState<Partial<EmployeeData>>(defaultEmployee);
   const mode: 'create' | 'edit' = employee_id ? 'edit' : 'create';
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDetail = async () => {
       if (mode === 'edit' && employee_id) {
-        setLoading(true);
         setError(null);
         // まずキャッシュから取得
         const cachedEmployees = getCache<EmployeeData[]>("employees");
@@ -40,7 +38,6 @@ const EmployeeManagementDetailPage = () => {
         }
         if (found) {
           setEmployee(found);
-          setLoading(false);
           return;
         }
         // キャッシュにない場合はAPI
@@ -54,19 +51,13 @@ const EmployeeManagementDetailPage = () => {
         } catch (err) {
           setError('従業員情報の取得に失敗しました');
         } finally {
-          setLoading(false);
         }
       }
     };
     fetchDetail();
   }, [employee_id, mode]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmployee({ ...employee, [e.target.name]: e.target.value });
-  };
-
   const handleCreate = async () => {
-    setLoading(true);
     setError(null);
     setSuccess(null);
     try {
@@ -80,12 +71,10 @@ const EmployeeManagementDetailPage = () => {
     } catch (err) {
       setError('作成に失敗しました');
     } finally {
-      setLoading(false);
     }
   };
 
   const handleUpdate = async () => {
-    setLoading(true);
     setError(null);
     setSuccess(null);
     try {
@@ -99,13 +88,11 @@ const EmployeeManagementDetailPage = () => {
     } catch (err) {
       setError('更新に失敗しました');
     } finally {
-      setLoading(false);
     }
   };
 
   const handleDelete = async () => {
     if (!employee.employee_id) return;
-    setLoading(true);
     setError(null);
     setSuccess(null);
     try {
@@ -119,7 +106,6 @@ const EmployeeManagementDetailPage = () => {
     } catch (err) {
       setError('削除に失敗しました');
     } finally {
-      setLoading(false);
     }
   };
 
