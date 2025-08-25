@@ -8,7 +8,7 @@ interface BackButtonProps {
   navigateTo?: string;
 }
 
-const BackButton: React.FC<BackButtonProps> = ({ label = '首頁', navigateTo = '/' }) => {
+const BackButton: React.FC<BackButtonProps> = ({ label = '首頁', navigateTo = '/originaloptical-payroll-frontend' }) => {
   const navigate = useNavigate();
   return (
     <div className="back-button-container">

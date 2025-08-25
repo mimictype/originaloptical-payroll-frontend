@@ -40,7 +40,7 @@ const PayrollEditPage: React.FC = () => {
         setError('保存に失敗しました。');
       } else {
         alert('修改成功');
-        window.location.href = '/';
+        window.location.href = '/originaloptical-payroll-frontend';
       }
     } catch (err) {
       setError('保存に失敗しました。');
@@ -67,7 +67,7 @@ const PayrollEditPage: React.FC = () => {
       } else {
         alert('刪除成功');
         // 削除後は一覧ページへ遷移
-        window.location.href = '/';
+        window.location.href = '/originaloptical-payroll-frontend';
       }
     } catch (err) {
       setError('削除に失敗しました。');
