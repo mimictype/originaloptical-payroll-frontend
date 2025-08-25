@@ -2,14 +2,16 @@ import './EmployeeInfo.css';
 import Section from './Section';
 import type { EmployeeData } from '../types/index';
 
+
 interface EmployeeInfoProps {
   employee: EmployeeData;
   editable?: boolean;
   showEmail?: boolean;
   onChange?: (field: keyof EmployeeData, value: string) => void;
+  employeeIdDisabled?: boolean;
 }
 
-function EmployeeInfo({ employee, editable = false, showEmail = true, onChange }: EmployeeInfoProps) {
+function EmployeeInfo({ employee, editable = false, showEmail = true, onChange, employeeIdDisabled = false }: EmployeeInfoProps) {
   return (
     <Section title="基本資料">
       <div className="employee-info">
@@ -18,7 +20,7 @@ function EmployeeInfo({ employee, editable = false, showEmail = true, onChange }
             <tr>
               <td>員工ID</td>
               <td>
-                {editable ? (
+                {editable && !employeeIdDisabled? (
                   <input
                     type="text"
                     value={employee.employee_id}

@@ -117,14 +117,20 @@ const EmployeeManagementDetailPage = () => {
     <div className="employee-detail-page">
       <div className="page-header">
         <BackButton label="員工管理" navigateTo="/employee-management" />
-          {mode === 'create' ? (
-            <h2>新增員工</h2>
-          ) : (
-            <h2>修改員工資料</h2>
-          )}
+        {mode === 'create' ? (
+          <h2>新增員工</h2>
+        ) : (
+          <h2>修改員工資料</h2>
+        )}
       </div>
       <form className="employee-form detail-form" onSubmit={e => e.preventDefault()}>
-        <EmployeeInfo employee={employee as EmployeeData} editable={true} showEmail={true} onChange={handleEmployeeChange} />
+        <EmployeeInfo
+          employee={employee as EmployeeData}
+          editable={true}
+          showEmail={true}
+          onChange={handleEmployeeChange}
+          employeeIdDisabled={mode === 'edit'}
+        />
         <div className="form-actions detail-actions">
           {mode === 'create' ? (
             <MButton type="create" onClick={handleCreate} name="作成" />
