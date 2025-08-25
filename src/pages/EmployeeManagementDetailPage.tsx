@@ -109,6 +109,10 @@ const EmployeeManagementDetailPage = () => {
     }
   };
 
+  const handleEmployeeChange = (field: keyof EmployeeData, value: string) => {
+    setEmployee(prev => ({ ...prev, [field]: field === 'bank_account' ? Number(value) : value }));
+  };
+
   return (
     <div className="employee-detail-page">
       <div className="page-header">
@@ -120,7 +124,7 @@ const EmployeeManagementDetailPage = () => {
           )}
       </div>
       <form className="employee-form detail-form" onSubmit={e => e.preventDefault()}>
-        <EmployeeInfo employee={employee as EmployeeData} editable={true} showEmail={true} />
+        <EmployeeInfo employee={employee as EmployeeData} editable={true} showEmail={true} onChange={handleEmployeeChange} />
         <div className="form-actions detail-actions">
           {mode === 'create' ? (
             <MButton type="create" onClick={handleCreate} name="作成" />
