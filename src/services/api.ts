@@ -3,15 +3,17 @@ import type { PayrollData, LeaveData, EmployeeData, EmployeeListData } from '../
 import { setCache, getCache, clearCache } from '../utils/cache';
 
 // API URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbwP1du1w3CEPLMqTSsynBEjlj7mHTRfR4pdFay4BReJEFB0dy_Pp7INTeTM-Wl6qpW13Q/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx2ZCT8e6RLvBpUYFYg3w8p9swW0t_zJGroE7Lv-2MCvj-IMftUPF8PYefYFssShktV/exec';
 
 // 従業員の作成
-export const createEmployee = async (payload: Partial<EmployeeData>) => {
+export const createEmployee = async (payload: Partial<EmployeeData>, idToken?: string) => {
+  if (!idToken) idToken = localStorage.getItem('id_token') || undefined;
   const params = new URLSearchParams();
   params.append('action', 'createemployee');
   Object.entries(payload).forEach(([key, value]) => {
     if (value !== undefined && value !== null) params.append(key, String(value));
   });
+  if (idToken) params.append('id_token', idToken);
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -30,12 +32,14 @@ export const createEmployee = async (payload: Partial<EmployeeData>) => {
 };
 
 // 従業員の更新
-export const updateEmployee = async (payload: Partial<EmployeeData>) => {
+export const updateEmployee = async (payload: Partial<EmployeeData>, idToken?: string) => {
+  if (!idToken) idToken = localStorage.getItem('id_token') || undefined;
   const params = new URLSearchParams();
   params.append('action', 'updateemployee');
   Object.entries(payload).forEach(([key, value]) => {
     if (value !== undefined && value !== null) params.append(key, String(value));
   });
+  if (idToken) params.append('id_token', idToken);
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -54,10 +58,12 @@ export const updateEmployee = async (payload: Partial<EmployeeData>) => {
 };
 
 // 従業員の削除
-export const deleteEmployee = async (employee_id: string) => {
+export const deleteEmployee = async (employee_id: string, idToken?: string) => {
+  if (!idToken) idToken = localStorage.getItem('id_token') || undefined;
   const params = new URLSearchParams();
   params.append('action', 'deleteemployee');
   params.append('employee_id', employee_id);
+  if (idToken) params.append('id_token', idToken);
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -79,7 +85,9 @@ export const deleteEmployee = async (employee_id: string) => {
 export const fetchEmployees = async (): Promise<EmployeeData[]> => {
   try {
     console.log('Fetching employees from API');
-    const response = await fetch(`${API_URL}?action=listEmployees`, {
+    const idToken = localStorage.getItem('id_token');
+    const url = idToken ? `${API_URL}?action=listEmployees&id_token=${encodeURIComponent(idToken)}` : `${API_URL}?action=listEmployees`;
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json'
@@ -105,8 +113,11 @@ export const fetchEmployeePayroll = async (employeeId: string, year: number, mon
     // 月は2桁にパディング
     const monthStr = month.toString().padStart(2, '0');
     console.log(`Fetching payroll from API for ${employeeId} ${year}年${month}月`);
-    // API呼び出し - 従業員ID_YYMM形式 (民国年を使用)
-    const response = await fetch(`${API_URL}?action=getPayroll&id=${employeeId}_${year}${monthStr}`, {
+    const idToken = localStorage.getItem('id_token');
+    const url = idToken
+      ? `${API_URL}?action=getPayroll&id=${employeeId}_${year}${monthStr}&id_token=${encodeURIComponent(idToken)}`
+      : `${API_URL}?action=getPayroll&id=${employeeId}_${year}${monthStr}`;
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json'
@@ -135,8 +146,11 @@ export const fetchEmployeeLeave = async (employeeId: string, year: number, month
     // 月は2桁にパディング
     const monthStr = month.toString().padStart(2, '0');
     console.log(`Fetching leave from API for ${employeeId} ${year}年${month}月`);
-    // API呼び出し - 従業員ID_YYMM形式 (民国年を使用)
-    const response = await fetch(`${API_URL}?action=getleave&id=${employeeId}_${year}${monthStr}`, {
+    const idToken = localStorage.getItem('id_token');
+    const url = idToken
+      ? `${API_URL}?action=getleave&id=${employeeId}_${year}${monthStr}&id_token=${encodeURIComponent(idToken)}`
+      : `${API_URL}?action=getleave&id=${employeeId}_${year}${monthStr}`;
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json'
@@ -159,12 +173,14 @@ export const fetchEmployeeLeave = async (employeeId: string, year: number, month
 };
 
 // 給与明細の更新
-export const updatePayroll = async (payload: Partial<PayrollData>) => {
+export const updatePayroll = async (payload: Partial<PayrollData>, idToken?: string) => {
+  if (!idToken) idToken = localStorage.getItem('id_token') || undefined;
   const params = new URLSearchParams();
   params.append('action', 'updatepayroll');
   Object.entries(payload).forEach(([key, value]) => {
     if (value !== undefined && value !== null) params.append(key, String(value));
   });
+  if (idToken) params.append('id_token', idToken);
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -180,12 +196,14 @@ export const updatePayroll = async (payload: Partial<PayrollData>) => {
 };
 
 // 休暇明細の更新
-export const updateLeave = async (payload: Partial<LeaveData>) => {
+export const updateLeave = async (payload: Partial<LeaveData>, idToken?: string) => {
+  if (!idToken) idToken = localStorage.getItem('id_token') || undefined;
   const params = new URLSearchParams();
   params.append('action', 'updateleave');
   Object.entries(payload).forEach(([key, value]) => {
     if (value !== undefined && value !== null) params.append(key, String(value));
   });
+  if (idToken) params.append('id_token', idToken);
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -201,10 +219,12 @@ export const updateLeave = async (payload: Partial<LeaveData>) => {
 };
 
 // 給与明細の削除
-export const deletePayroll = async (id: string) => {
+export const deletePayroll = async (id: string, idToken?: string) => {
+  if (!idToken) idToken = localStorage.getItem('id_token') || undefined;
   const params = new URLSearchParams();
   params.append('action', 'deletepayroll');
   params.append('id', id);
+  if (idToken) params.append('id_token', idToken);
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -220,10 +240,12 @@ export const deletePayroll = async (id: string) => {
 };
 
 // 休暇明細の削除
-export const deleteLeave = async (id: string) => {
+export const deleteLeave = async (id: string, idToken?: string) => {
+  if (!idToken) idToken = localStorage.getItem('id_token') || undefined;
   const params = new URLSearchParams();
   params.append('action', 'deleteleave');
   params.append('id', id);
+  if (idToken) params.append('id_token', idToken);
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -239,12 +261,14 @@ export const deleteLeave = async (id: string) => {
 };
 
 // 給与明細の作成
-export const createPayroll = async (payload: Partial<PayrollData>) => {
+export const createPayroll = async (payload: Partial<PayrollData>, idToken?: string) => {
+  if (!idToken) idToken = localStorage.getItem('id_token') || undefined;
   const params = new URLSearchParams();
   params.append('action', 'createpayroll');
   Object.entries(payload).forEach(([key, value]) => {
     if (value !== undefined && value !== null) params.append(key, String(value));
   });
+  if (idToken) params.append('id_token', idToken);
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -260,12 +284,14 @@ export const createPayroll = async (payload: Partial<PayrollData>) => {
 };
 
 // 休暇明細の作成
-export const createLeave = async (payload: Partial<LeaveData>) => {
+export const createLeave = async (payload: Partial<LeaveData>, idToken?: string) => {
+  if (!idToken) idToken = localStorage.getItem('id_token') || undefined;
   const params = new URLSearchParams();
   params.append('action', 'createleave');
   Object.entries(payload).forEach(([key, value]) => {
     if (value !== undefined && value !== null) params.append(key, String(value));
   });
+  if (idToken) params.append('id_token', idToken);
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
