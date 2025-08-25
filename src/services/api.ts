@@ -1,5 +1,6 @@
 // API服務的實現
 import type { PayrollData, LeaveData, EmployeeData, EmployeeListData } from '../types/index';
+import { setCache, getCache, clearCache } from '../utils/cache';
 
 // API URL
 const API_URL = 'https://script.google.com/macros/s/AKfycbwP1du1w3CEPLMqTSsynBEjlj7mHTRfR4pdFay4BReJEFB0dy_Pp7INTeTM-Wl6qpW13Q/exec';
@@ -18,7 +19,14 @@ export const createEmployee = async (payload: Partial<EmployeeData>) => {
     },
     body: params,
   });
-  return await response.json();
+  const result = await response.json();
+  if (result.status === 'success' && result.record) {
+    setCache(`employee_${result.record.employee_id}`, result.record);
+    // 一覧キャッシュも追加
+    const employees = getCache<EmployeeData[]>('employees') || [];
+    setCache('employees', [...employees, result.record]);
+  }
+  return result;
 };
 
 // 従業員の更新
@@ -35,7 +43,14 @@ export const updateEmployee = async (payload: Partial<EmployeeData>) => {
     },
     body: params,
   });
-  return await response.json();
+  const result = await response.json();
+  if (result.status === 'success' && result.record) {
+    setCache(`employee_${result.record.employee_id}`, result.record);
+    // 一覧キャッシュも更新
+    const employees = getCache<EmployeeData[]>('employees') || [];
+    setCache('employees', employees.map(e => e.employee_id === result.record.employee_id ? result.record : e));
+  }
+  return result;
 };
 
 // 従業員の削除
@@ -50,7 +65,14 @@ export const deleteEmployee = async (employee_id: string) => {
     },
     body: params,
   });
-  return await response.json();
+  const result = await response.json();
+  if (result.status === 'success') {
+    clearCache(`employee_${employee_id}`);
+    // 一覧キャッシュも削除
+    const employees = getCache<EmployeeData[]>('employees') || [];
+    setCache('employees', employees.filter(e => e.employee_id !== employee_id));
+  }
+  return result;
 };
 
 // 従業員一覧を取得する関数
@@ -136,99 +158,124 @@ export const fetchEmployeeLeave = async (employeeId: string, year: number, month
   }
 };
 
-  // 給与明細の更新
-  export const updatePayroll = async (payload: Partial<PayrollData>) => {
-    const params = new URLSearchParams();
-    params.append('action', 'updatepayroll');
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) params.append(key, String(value));
-    });
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-      },
-      body: params,
-    });
-    return await response.json();
-  };
+// 給与明細の更新
+export const updatePayroll = async (payload: Partial<PayrollData>) => {
+  const params = new URLSearchParams();
+  params.append('action', 'updatepayroll');
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) params.append(key, String(value));
+  });
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+    },
+    body: params,
+  });
+  const result = await response.json();
+  if (result.status === 'success' && result.data) {
+    setCache(`payroll_${result.data.id}`, result.data);
+  }
+  return result;
+};
 
-  // 休暇明細の更新
-  export const updateLeave = async (payload: Partial<LeaveData>) => {
-    const params = new URLSearchParams();
-    params.append('action', 'updateleave');
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) params.append(key, String(value));
-    });
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-      },
-      body: params,
-    });
-    return await response.json();
-  };
-  // 給与明細の削除
-  export const deletePayroll = async (id: string) => {
-    const params = new URLSearchParams();
-    params.append('action', 'deletepayroll');
-    params.append('id', id);
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-      },
-      body: params,
-    });
-    return await response.json();
-  };
+// 休暇明細の更新
+export const updateLeave = async (payload: Partial<LeaveData>) => {
+  const params = new URLSearchParams();
+  params.append('action', 'updateleave');
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) params.append(key, String(value));
+  });
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+    },
+    body: params,
+  });
+  const result = await response.json();
+  if (result.status === 'success' && result.data) {
+    setCache(`leave_${result.data.id}`, result.data);
+  }
+  return result;
+};
 
-  // 休暇明細の削除
-  export const deleteLeave = async (id: string) => {
-    const params = new URLSearchParams();
-    params.append('action', 'deleteleave');
-    params.append('id', id);
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-      },
-      body: params,
-    });
-    return await response.json();
-  };
+// 給与明細の削除
+export const deletePayroll = async (id: string) => {
+  const params = new URLSearchParams();
+  params.append('action', 'deletepayroll');
+  params.append('id', id);
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+    },
+    body: params,
+  });
+  const result = await response.json();
+  if (result.status === 'success') {
+    clearCache(`payroll_${id}`);
+  }
+  return result;
+};
 
-  // 給与明細の作成
-  export const createPayroll = async (payload: Partial<PayrollData>) => {
-    const params = new URLSearchParams();
-    params.append('action', 'createpayroll');
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) params.append(key, String(value));
-    });
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-      },
-      body: params,
-    });
-    return await response.json();
-  };
+// 休暇明細の削除
+export const deleteLeave = async (id: string) => {
+  const params = new URLSearchParams();
+  params.append('action', 'deleteleave');
+  params.append('id', id);
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+    },
+    body: params,
+  });
+  const result = await response.json();
+  if (result.status === 'success') {
+    clearCache(`leave_${id}`);
+  }
+  return result;
+};
 
-  // 休暇明細の作成
-  export const createLeave = async (payload: Partial<LeaveData>) => {
-    const params = new URLSearchParams();
-    params.append('action', 'createleave');
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) params.append(key, String(value));
-    });
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-      },
-      body: params,
-    });
-    return await response.json();
-  };
+// 給与明細の作成
+export const createPayroll = async (payload: Partial<PayrollData>) => {
+  const params = new URLSearchParams();
+  params.append('action', 'createpayroll');
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) params.append(key, String(value));
+  });
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+    },
+    body: params,
+  });
+  const result = await response.json();
+  if (result.status === 'success' && result.data) {
+    setCache(`payroll_${result.data.id}`, result.data);
+  }
+  return result;
+};
+
+// 休暇明細の作成
+export const createLeave = async (payload: Partial<LeaveData>) => {
+  const params = new URLSearchParams();
+  params.append('action', 'createleave');
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) params.append(key, String(value));
+  });
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+    },
+    body: params,
+  });
+  const result = await response.json();
+  if (result.status === 'success' && result.data) {
+    setCache(`leave_${result.data.id}`, result.data);
+  }
+  return result;
+};
