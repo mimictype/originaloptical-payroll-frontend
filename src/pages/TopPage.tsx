@@ -4,6 +4,7 @@ import { useState } from 'react';
 import '../App.css';
 import './pageStyles.css';
 import GoogleLogin from '../components/GoogleLogin';
+import MButton from '../components/MButton';
 // import { clearAllCache } from '../utils/cache';
 
 const TopPage = () => {
@@ -35,6 +36,14 @@ const TopPage = () => {
           <Link to="/payroll-management" className="button-block">
             薪資管理
           </Link>
+          <div className="top-page-login"></div>
+          <div className="top-page-login"></div>
+          <div className="top-page-login">
+            <MButton name="登出" onClick={() => {
+              localStorage.removeItem('id_token');
+              setIsLoggedIn(false);
+            }} />
+          </div>
         </div>
       )}
     </div>
