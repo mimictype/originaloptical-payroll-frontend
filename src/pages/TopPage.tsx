@@ -20,7 +20,7 @@ const TopPage = () => {
 
   return (
     <div className="top-page">
-      <h1>Original Optical 人資管理系統</h1>
+      <h1>原作眼鏡 人資管理系統</h1>
       {!isLoggedIn ? (
         <div className="top-page-login">
           <GoogleLogin onLogin={handleGoogleLogin} />
