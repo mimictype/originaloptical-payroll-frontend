@@ -3,7 +3,7 @@ import type { PayrollData, LeaveData, EmployeeData, EmployeeListData } from '../
 import { setCache, getCache, clearCache } from '../utils/cache';
 
 // API URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbx2ZCT8e6RLvBpUYFYg3w8p9swW0t_zJGroE7Lv-2MCvj-IMftUPF8PYefYFssShktV/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbz4q5eVez44_qyRMfNs8zTRB-uaqMDWlgcjOcUN4zrORU5OnZOJBJ4VWxE94WtBdvj4sw/exec';
 
 // 従業員の作成
 export const createEmployee = async (payload: Partial<EmployeeData>, idToken?: string) => {
