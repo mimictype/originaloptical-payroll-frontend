@@ -146,7 +146,7 @@ const PayrollCreatePage: FC = () => {
           );
         } else {
           alert('登錄成功');
-          window.location.href = '/PayrollManagement';
+          window.location.href = '/originaloptical-payroll-frontend/PayrollManagement';
         }
       } catch (err) {
         setError('作成に失敗しました。');
