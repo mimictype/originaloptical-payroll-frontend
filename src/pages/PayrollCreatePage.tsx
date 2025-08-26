@@ -546,7 +546,7 @@ const PayrollCreatePage: FC = () => {
   ] : [];
 
   const [adjustedOvertimeRows, setAdjustedOvertimeRows] = useState([
-    { label: '勞雇約定之補休期限', value: '', editableLabel: false },
+    { label: '勞雇約定之補休期限', value: formatDate(0), editableLabel: false },
     { label: '至上月底止休未補休時數', value: '', editableLabel: false },
     { label: '本月選擇補休時數', value: '', editableLabel: false },
     { label: '本月已補休時數', value: '', editableLabel: false },
@@ -607,7 +607,7 @@ const PayrollCreatePage: FC = () => {
           <EditableSalarySection
             title=""
             rows={[ 
-              { label: '發薪日期', value: String(formatDate(record.pay_date))},
+              { label: '發薪日期', value: formatDate(record.pay_date)},
             ]}
             onChange={handlePayDateChange}
           />
@@ -736,10 +736,20 @@ const PayrollCreatePage: FC = () => {
           rows={leaveAdjustmentRows}
           onChange={
             (rows) => {
-              const updatedRows = rows.map((row, idx) => ({
-                ...row,
-                editableLabel: leaveAdjustmentRows[idx]?.editableLabel ?? false
-              }));
+              const updatedRows = rows.map((row, idx) => {
+                // 請休期間開始・請休期間結束のみformatDateを通す
+                if ((row.label === '請休期間開始' || row.label === '請休期間結束') && /^\d{7}$/.test(row.value)) {
+                  return {
+                    ...row,
+                    value: formatDate(Number(row.value)),
+                    editableLabel: leaveAdjustmentRows[idx]?.editableLabel ?? false
+                  };
+                }
+                return {
+                  ...row,
+                  editableLabel: leaveAdjustmentRows[idx]?.editableLabel ?? false
+                };
+              });
               setLeaveAdjustmentRows(updatedRows);
             }
           }
@@ -756,16 +766,26 @@ const PayrollCreatePage: FC = () => {
         />
         <EditableSalarySection
           title="本月調整"
-          rows={adjustedOvertimeRows}
-          onChange={
-            (rows) => {
-              const updatedRows = rows.map((row, idx) => ({
-                ...row,
-                editableLabel: adjustedOvertimeRows[idx]?.editableLabel ?? false
-              }));
-              setAdjustedOvertimeRows(updatedRows);
+            rows={adjustedOvertimeRows}
+            onChange={
+              (rows) => {
+                const updatedRows = rows.map((row, idx) => {
+                  // 勞雇約定之補休期限のみformatDateを通す
+                  if (row.label === '勞雇約定之補休期限' && /^\d{7}$/.test(row.value)) {
+                    return {
+                      ...row,
+                      value: formatDate(Number(row.value)),
+                      editableLabel: adjustedOvertimeRows[idx]?.editableLabel ?? false
+                    };
+                  }
+                  return {
+                    ...row,
+                    editableLabel: adjustedOvertimeRows[idx]?.editableLabel ?? false
+                  };
+                });
+                setAdjustedOvertimeRows(updatedRows);
+              }
             }
-          }
         />
       </Section>
         </>
