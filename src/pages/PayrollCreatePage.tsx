@@ -181,7 +181,63 @@ const PayrollCreatePage: FC = () => {
         setLeaveDetail(leaveData);
         setError(null);
       } catch (err) {
-        setError('データの取得に失敗しました。再読み込みをお試しください。');
+          // 取得失敗時は空データで初期化
+          const payrollData: PayrollData = {
+            id: '',
+            pay_date: 0,
+            base_salary: 0,
+            meal_allowance: 0,
+            fixed_custom1_name: '',
+            fixed_custom1_amount: 0,
+            fixed_custom2_name: '',
+            fixed_custom2_amount: 0,
+            fixed_custom3_name: '',
+            fixed_custom3_amount: 0,
+            subtotal_A: 0,
+            overtime_weekday: 0,
+            overtime_holiday: 0,
+            overtime_restday: 0,
+            overtime_national: 0,
+            bonus: 0,
+            variable_custom1_name: '',
+            variable_custom1_amount: 0,
+            variable_custom2_name: '',
+            variable_custom2_amount: 0,
+            variable_custom3_name: '',
+            variable_custom3_amount: 0,
+            subtotal_B: 0,
+            labor_insurance: 0,
+            health_insurance: 0,
+            national_insurance: 0,
+            absence_deduction: 0,
+            sick_deduction: 0,
+            deduct_custom1_name: '',
+            deduct_custom1_amount: 0,
+            deduct_custom2_name: '',
+            deduct_custom2_amount: 0,
+            deduct_custom3_name: '',
+            deduct_custom3_amount: 0,
+            subtotal_C: 0,
+        };
+        const leaveData: LeaveData = {
+          id: '',
+          leave_start: 0,
+          leave_end: 0,
+          carryover_days: 0,
+          granted_days: 0,
+          used_days: 0,
+          remaining_days: 0,
+          thismonth_leave_days: '',
+          comp_expiry: 0,
+          carryover_hours: 0,
+          granted_hours: 0,
+          used_hours: 0,
+          cashout_hours: 0,
+          remaining_hours: 0,
+        };
+        setRecord(payrollData);
+        setLeaveDetail(leaveData);
+        setError(null);
       } finally {
         setLoading(false);
       }
