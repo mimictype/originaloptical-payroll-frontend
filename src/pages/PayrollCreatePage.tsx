@@ -526,8 +526,10 @@ const PayrollCreatePage: FC = () => {
     lastMonthLeaveRows.forEach(row => {
       const adjustment = leaveAdjustmentRows.find(r => r.label === row.label)?.value ?? '';
 
-      if (row.label === '請休期間開始' || row.label === '請休期間結束' || row.label === '今月請休日') {
+      if (row.label === '請休期間開始' || row.label === '請休期間結束') {
         resultRows.push({ label: row.label, value: adjustment || row.value || '' });
+      } else if (row.label === '今月請休日') {
+        resultRows.push({ label: row.label, value: adjustment || '' });
       } else if (row.label === '經過遞延日數') {
         const value = adjustment || '0';
         resultRows.push({ label: row.label, value });
