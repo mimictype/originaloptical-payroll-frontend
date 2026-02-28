@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import type { LeaveData, PayrollData } from '../types/index';
 import EditableSalarySection from '../components/EditableSalarySection';
@@ -26,16 +26,32 @@ const PayrollEditPage: React.FC = () => {
 
   const [leaveDetail, setLeaveDetail] = useState<LeaveData | null>(null);
 
+  const rocDateRegex = /^\d{7}$/;
+  const toRocNumber = (value: string | number | undefined | null) => {
+    const normalized = String(value ?? '').replace(/-/g, '');
+    return rocDateRegex.test(normalized) ? Number(normalized) : undefined;
+  };
+
+  const payrollId = useMemo(() => {
+    return employeeId && year && month ? `${employeeId}_${String(year)}${String(month).padStart(2, '0')}` : '';
+  }, [employeeId, year, month]);
+
   // 保存ボタン押下時の処理
   const handleSave = async () => {
     if (!record || !leaveDetail) return;
+    if (validationErrors.length > 0) return;
     setLoading(true);
     setError(null);
     try {
       // 給与明細更新
-      const payrollRes = await updatePayroll(record);
+      const payrollRes = await updatePayroll({ ...record, pay_date: payDateRoc ?? record.pay_date });
       // 休暇明細更新
-      const leaveRes = await updateLeave(leaveDetail);
+      const leaveRes = await updateLeave({
+        ...leaveDetail,
+        ...(leaveStartRoc !== undefined ? { leave_start: leaveStartRoc } : {}),
+        ...(leaveEndRoc !== undefined ? { leave_end: leaveEndRoc } : {}),
+        ...(compExpiryRoc !== undefined ? { comp_expiry: compExpiryRoc } : {}),
+      });
       if (payrollRes.status !== 'success' || leaveRes.status !== 'success') {
         setError('保存に失敗しました。');
       } else {
@@ -48,7 +64,7 @@ const PayrollEditPage: React.FC = () => {
       setLoading(false);
     }
   };
-    // 給与明細・休暇明細の削除処理
+      // 給与明細・休暇明細の削除処理
   const handleDelete = async () => {
     if (!record || !leaveDetail || !employeeId || !year || !month) return;
     setLoading(true);
@@ -106,13 +122,13 @@ const PayrollEditPage: React.FC = () => {
     setLeaveDetail(prev => prev ? {
       ...prev,
       // 0: leave_start, 1: leave_end, 2: carryover_days, 3: granted_days, 4: used_days, 5: remaining_days, 6: thismonth_leave_days
-      leave_start: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : prev.leave_start,
-      leave_end: rows[1]?.value ? Number(rows[1].value.replace(/-/g, '')) : prev.leave_end,
+      leave_start: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : 0,
+      leave_end: rows[1]?.value ? Number(rows[1].value.replace(/-/g, '')) : 0,
       carryover_days: Number(rows[2]?.value) || 0,
       granted_days: Number(rows[3]?.value) || 0,
       used_days: Number(rows[4]?.value) || 0,
       remaining_days: Number(rows[5]?.value) || (prev.carryover_days + prev.granted_days - prev.used_days),
-      thismonth_leave_days: rows[6]?.value || prev.thismonth_leave_days,
+      thismonth_leave_days: rows[6]?.value || '',
     } : prev);
   };
   // 加班補休編集時のコールバック
@@ -120,7 +136,7 @@ const PayrollEditPage: React.FC = () => {
     setLeaveDetail(prev => prev ? {
       ...prev,
       // 0: comp_expiry, 1: carryover_hours, 2: granted_hours, 3: used_hours, 4: cashout_hours, 5: remaining_hours
-      comp_expiry: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : prev.comp_expiry,
+      comp_expiry: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : 0,
       carryover_hours: Number(rows[1]?.value) || 0,
       granted_hours: Number(rows[2]?.value) || 0,
       used_hours: Number(rows[3]?.value) || 0,
@@ -182,7 +198,7 @@ const PayrollEditPage: React.FC = () => {
   const handlePayDateChange = (rows: Array<{ label: string; value: string }>) => {
     setRecord(prev => prev ? ({
       ...prev,
-      pay_date: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : prev.pay_date,
+      pay_date: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : 0,
     }) : prev);
   };
 
@@ -269,6 +285,25 @@ const PayrollEditPage: React.FC = () => {
       Number(leaveDetail.used_days || 0)
     );
   }, [leaveDetail]);
+
+  const payDateRoc = toRocNumber(record?.pay_date);
+  const leaveStartRoc = toRocNumber(leaveDetail?.leave_start);
+  const leaveEndRoc = toRocNumber(leaveDetail?.leave_end);
+  const compExpiryRoc = toRocNumber(leaveDetail?.comp_expiry);
+
+  const validationErrors = useMemo(() => {
+    const messages: string[] = [];
+    if (!payrollId) messages.push('従業員IDと年月が不足しています。');
+    if (!record) messages.push('給与データが未取得です。');
+    if (!leaveDetail) messages.push('休暇データが未取得です。');
+    if (record && !payDateRoc) messages.push('發薪日期は民国年月日(YYYMMDD)7桁で入力してください。');
+    if (leaveDetail && leaveDetail.leave_start && !leaveStartRoc) messages.push('請休期間開始は民国年(YYYMMDD)7桁で入力してください。');
+    if (leaveDetail && leaveDetail.leave_end && !leaveEndRoc) messages.push('請休期間結束は民国年(YYYMMDD)7桁で入力してください。');
+    if (leaveDetail && leaveDetail.comp_expiry && !compExpiryRoc) messages.push('勞雇約定之補休期限は民国年(YYYMMDD)7桁で入力してください。');
+    return messages;
+  }, [payrollId, record, leaveDetail, payDateRoc, leaveStartRoc, leaveEndRoc, compExpiryRoc]);
+
+  const isSaveDisabled = validationErrors.length > 0 || loading;
 
   if (loading) {
         return <LoadingSpinner />;
@@ -373,8 +408,15 @@ const PayrollEditPage: React.FC = () => {
           </div>
         </Section>
       )}
+      {validationErrors.length > 0 && (
+        <div className="error-container">
+          {validationErrors.map(msg => (
+            <div className="error" key={msg}>{msg}</div>
+          ))}
+        </div>
+      )}
         <div>
-          <MButton name="修改" type='confirm' onClick={handleSave} />
+          <MButton name="修改" type='confirm' onClick={handleSave} disabled={isSaveDisabled} />
         </div>
         <div className="delete-action-center">
 

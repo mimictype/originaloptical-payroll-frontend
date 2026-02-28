@@ -5,9 +5,10 @@ interface MButtonProps {
   onClick?: () => void;
   name?: React.ReactNode;
   type?: 'delete' | 'confirm' | 'create';
+  disabled?: boolean;
 }
 
-const MButton: React.FC<MButtonProps> = ({ onClick, name, type }) => {
+const MButton: React.FC<MButtonProps> = ({ onClick, name, type, disabled }) => {
   let typeClass = '';
   switch (type) {
     case 'delete':
@@ -23,7 +24,7 @@ const MButton: React.FC<MButtonProps> = ({ onClick, name, type }) => {
       typeClass = '';
   }
   return (
-    <button className={`m-button ${typeClass}`} onClick={onClick}>
+    <button className={`m-button ${typeClass}`} onClick={onClick} disabled={disabled}>
       {name || 'ボタン'}
     </button>
   );

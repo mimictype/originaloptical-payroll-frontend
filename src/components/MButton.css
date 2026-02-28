@@ -18,6 +18,16 @@
   background-color: #868686;
 }
 
+.m-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.m-button:disabled:hover {
+  background: #262626;
+}
+
 .m-button-delete {
   background-color: #84201e;
 }

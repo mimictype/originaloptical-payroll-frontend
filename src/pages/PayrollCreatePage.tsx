@@ -27,16 +27,36 @@ const PayrollCreatePage: FC = () => {
   // APIから取得したデータ
   const [record, setRecord] = useState<PayrollData | null>(null);
 
+  const rocDateRegex = /^\d{7}$/;
+  const toRocNumber = (value: string | number | undefined | null) => {
+    const normalized = String(value ?? '').replace(/-/g, '');
+    return rocDateRegex.test(normalized) ? Number(normalized) : undefined;
+  };
+
+  const payrollId = useMemo(() => {
+    return employeeId && year && month ? `${employeeId}_${year}${month.padStart(2, '0')}` : '';
+  }, [employeeId, year, month]);
+
+  const getRowValue = (rows: Array<{ label: string; value: string }>, label: string) => {
+    return rows.find(r => r.label === label)?.value ?? '';
+  };
+
     // 登錄ボタン押下時の処理
     const handleCreate = async () => {
       if (!record || !leaveDetail) return;
+      if (validationErrors.length > 0) {
+        return;
+      }
+
+      if (!payrollId || !payDateRoc) return;
+
       setLoading(true);
       setError(null);
       try {
         // previewRowsからAPI型にマッピング
         const payrollPayload: Partial<PayrollData> = {
-          id: employeeId && year && month ? `${employeeId}_${year}${month.padStart(2, '0')}` : undefined,
-          pay_date: record.pay_date,
+          id: payrollId,
+          pay_date: payDateRoc,
           // 固定項目
           base_salary: Number(previewFixedRows.find(r => r.label === '底薪')?.value || 0),
           meal_allowance: Number(previewFixedRows.find(r => r.label === '伙食津貼')?.value || 0),
@@ -114,21 +134,15 @@ const PayrollCreatePage: FC = () => {
         // 休暇明細ペイロード作成
         const leavePayload: Partial<LeaveData> = {
           // IDは従業員ID_年月（民国年+月）形式で生成（URLパラメータのyearとmonthを使用）
-          id: employeeId && year && month ? `${employeeId}_${year}${month.padStart(2, '0')}` : undefined,
-          leave_start: previewLeaveRows.find(r => r.label === '請休期間開始')?.value
-            ? Number(previewLeaveRows.find(r => r.label === '請休期間開始')!.value.replace(/-/g, ''))
-            : 0,
-          leave_end: previewLeaveRows.find(r => r.label === '請休期間結束')?.value
-            ? Number(previewLeaveRows.find(r => r.label === '請休期間結束')!.value.replace(/-/g, ''))
-            : 0,
+          id: payrollId,
+          ...(leaveStartRoc !== undefined ? { leave_start: leaveStartRoc } : {}),
+          ...(leaveEndRoc !== undefined ? { leave_end: leaveEndRoc } : {}),
           carryover_days: Number(previewLeaveRows.find(r => r.label === '經過遞延日數')?.value || 0),
           granted_days: Number(previewLeaveRows.find(r => r.label === '今年可休日數')?.value || 0),
           used_days: Number(previewLeaveRows.find(r => r.label === '今年已休日數')?.value || 0),
           remaining_days: Number(previewLeaveRows.find(r => r.label === '今年未休日數')?.value || 0),
           thismonth_leave_days: previewLeaveRows.find(r => r.label === '今月請休日')?.value || '',
-          comp_expiry: previewOvertimeRows.find(r => r.label === '勞雇約定之補休期限')?.value
-            ? Number(previewOvertimeRows.find(r => r.label === '勞雇約定之補休期限')!.value.replace(/-/g, ''))
-            : 0,
+          ...(compExpiryRoc !== undefined ? { comp_expiry: compExpiryRoc } : {}),
           carryover_hours: Number(previewOvertimeRows.find(r => r.label === '至上月底止休未補休時數')?.value || 0),
           granted_hours: Number(previewOvertimeRows.find(r => r.label === '本月選擇補休時數')?.value || 0),
           used_hours: Number(previewOvertimeRows.find(r => r.label === '本月已補休時數')?.value || 0),
@@ -469,7 +483,7 @@ const PayrollCreatePage: FC = () => {
   const handlePayDateChange = (rows: Array<{ label: string; value: string }>) => {
     setRecord(prev => prev ? ({
       ...prev,
-      pay_date: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : prev.pay_date,
+      pay_date: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : 0,
     }) : prev);
   };
 
@@ -484,8 +498,8 @@ const PayrollCreatePage: FC = () => {
   useEffect(() => {
     if (leaveDetail) {
       setLeaveAdjustmentRows([
-        { label: '請休期間開始', value: formatDate(leaveDetail.leave_start), editableLabel: false },
-        { label: '請休期間結束', value: formatDate(leaveDetail.leave_end), editableLabel: false },
+        { label: '請休期間開始', value: leaveDetail.leave_start ? formatDate(leaveDetail.leave_start) : '', editableLabel: false },
+        { label: '請休期間結束', value: leaveDetail.leave_end ? formatDate(leaveDetail.leave_end) : '', editableLabel: false },
         { label: '經過遞延日數', value: '', editableLabel: false },
         { label: '今月已休日數', value: '', editableLabel: false },
         { label: '今月請休日', value: '', editableLabel: false }
@@ -510,18 +524,21 @@ const PayrollCreatePage: FC = () => {
     let usedValue: number | null = null;
 
     lastMonthLeaveRows.forEach(row => {
+      const adjustment = leaveAdjustmentRows.find(r => r.label === row.label)?.value ?? '';
+
       if (row.label === '請休期間開始' || row.label === '請休期間結束' || row.label === '今月請休日') {
-        resultRows.push({ label: row.label, value: String(leaveAdjustmentRows.find(r => r.label === row.label)?.value) });
+        resultRows.push({ label: row.label, value: adjustment || row.value || '' });
       } else if (row.label === '經過遞延日數') {
-        resultRows.push({ label: row.label, value: String(leaveAdjustmentRows.find(r => r.label === row.label)?.value) || '0' });
+        const value = adjustment || '0';
+        resultRows.push({ label: row.label, value });
       } else if (row.label === '今年可休日數') {
-        const adjustmentRow = leaveAdjustmentRows.find(r => r.label === '經過遞延日數');
-        const value = adjustmentRow ? String(Number(row.value) + Number(adjustmentRow.value)) : row.value;
+        const deferred = leaveAdjustmentRows.find(r => r.label === '經過遞延日數')?.value ?? '0';
+        const value = String(Number(row.value || 0) + Number(deferred || 0));
         resultRows.push({ label: row.label, value });
         grantedValue = Number(value);
       } else if (row.label === '今年已休日數') {
-        const adjustmentRow = leaveAdjustmentRows.find(r => r.label === '今月已休日數');
-        const value = adjustmentRow ? String(Number(row.value) + Number(adjustmentRow.value)) : row.value;
+        const thisMonth = leaveAdjustmentRows.find(r => r.label === '今月已休日數')?.value ?? '0';
+        const value = String(Number(row.value || 0) + Number(thisMonth || 0));
         resultRows.push({ label: row.label, value });
         usedValue = Number(value);
       } else if (row.label === '今年未休日數') {
@@ -546,7 +563,7 @@ const PayrollCreatePage: FC = () => {
   ] : [];
 
   const [adjustedOvertimeRows, setAdjustedOvertimeRows] = useState([
-    { label: '勞雇約定之補休期限', value: formatDate(0), editableLabel: false },
+    { label: '勞雇約定之補休期限', value: '', editableLabel: false },
     { label: '至上月底止休未補休時數', value: '', editableLabel: false },
     { label: '本月選擇補休時數', value: '', editableLabel: false },
     { label: '本月已補休時數', value: '', editableLabel: false },
@@ -556,7 +573,7 @@ const PayrollCreatePage: FC = () => {
   useEffect(() => {
     if (leaveDetail) {
       setAdjustedOvertimeRows([
-        { label: '勞雇約定之補休期限', value: formatDate(leaveDetail.comp_expiry), editableLabel: false },
+        { label: '勞雇約定之補休期限', value: leaveDetail.comp_expiry ? formatDate(leaveDetail.comp_expiry) : '', editableLabel: false },
         { label: '至上月底止休未補休時數', value: '', editableLabel: false },
         { label: '本月選擇補休時數', value: ``, editableLabel: false },
         { label: '本月已補休時數', value: ``, editableLabel: false },
@@ -572,6 +589,28 @@ const PayrollCreatePage: FC = () => {
       value: String(row.value)
     }));
   }, [adjustedOvertimeRows]);
+
+  const payDateRoc = toRocNumber(record?.pay_date);
+  const leaveStartInput = getRowValue(previewLeaveRows, '請休期間開始');
+  const leaveEndInput = getRowValue(previewLeaveRows, '請休期間結束');
+  const compExpiryInput = getRowValue(previewOvertimeRows, '勞雇約定之補休期限');
+  const leaveStartRoc = toRocNumber(leaveStartInput);
+  const leaveEndRoc = toRocNumber(leaveEndInput);
+  const compExpiryRoc = toRocNumber(compExpiryInput);
+
+  const validationErrors = useMemo(() => {
+    const messages: string[] = [];
+    if (!payrollId) messages.push('従業員IDと年月が不足しています。');
+    if (!record) messages.push('給与データが未取得です。');
+    if (!leaveDetail) messages.push('休暇データが未取得です。');
+    if (record && !payDateRoc) messages.push('發薪日期は民国年月日(YYYMMDD)7桁で入力してください。');
+    if (leaveStartInput && !leaveStartRoc) messages.push('請休期間開始は民国年(YYYMMDD)7桁で入力してください。');
+    if (leaveEndInput && !leaveEndRoc) messages.push('請休期間結束は民国年(YYYMMDD)7桁で入力してください。');
+    if (compExpiryInput && !compExpiryRoc) messages.push('勞雇約定之補休期限は民国年(YYYMMDD)7桁で入力してください。');
+    return messages;
+  }, [payrollId, record, leaveDetail, payDateRoc, leaveStartInput, leaveStartRoc, leaveEndInput, leaveEndRoc, compExpiryInput, compExpiryRoc]);
+
+  const isCreateDisabled = validationErrors.length > 0 || loading;
 
   if (loading) {
         return <LoadingSpinner />;
@@ -790,8 +829,15 @@ const PayrollCreatePage: FC = () => {
       </Section>
         </>
       )}
+      {validationErrors.length > 0 && (
+        <div className="error-container">
+          {validationErrors.map(msg => (
+            <div className="error" key={msg}>{msg}</div>
+          ))}
+        </div>
+      )}
       <div>
-        <MButton name="登錄" type='confirm' onClick={handleCreate} />
+        <MButton name="登錄" type='confirm' onClick={handleCreate} disabled={isCreateDisabled} />
       </div>
     </div>
   );
