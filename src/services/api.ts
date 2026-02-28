@@ -102,7 +102,7 @@ export const fetchEmployees = async (): Promise<EmployeeData[]> => {
     }
     return data.data;
   } catch (error) {
-    console.error('従業員一覧の取得に失敗しました', error);
+    console.error('取得員工列表失敗', error);
     throw error;
   }
 };
@@ -135,7 +135,7 @@ export const fetchEmployeePayroll = async (employeeId: string, year: number, mon
     const record = data.record;
     return record;
   } catch (error) {
-    console.error(`従業員${employeeId}の給与明細取得に失敗しました`, error);
+    console.error(`取得員工${employeeId}的薪資明細失敗`, error);
     throw error;
   }
 };
@@ -167,7 +167,7 @@ export const fetchEmployeeLeave = async (employeeId: string, year: number, month
     const leaveRecord = data.record;
     return leaveRecord;
   } catch (error) {
-    console.error(`従業員${employeeId}の休暇明細取得に失敗しました`, error);
+    console.error(`取得員工${employeeId}的休假明細失敗`, error);
     throw error;
   }
 };

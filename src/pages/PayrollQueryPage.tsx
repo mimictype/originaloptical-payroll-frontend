@@ -26,7 +26,7 @@ const PayrollQueryPage = () => {
           const data = await getEmployees();
           setEmployees(data);
         } catch (err: any) {
-          setError('従業員データの取得に失敗しました');
+          setError('取得員工資料失敗');
         }
       };
       fetchData();

@@ -25,7 +25,7 @@ const PayrollDetailPage = () => {
   useEffect(() => {
     const getPayrollDetail = async () => {
       if (!employeeId || !year || !month) {
-        setError('従業員IDと年月が指定されていません');
+        setError('未指定員工ID與年月');
         setLoading(false);
         return;
       }
@@ -45,13 +45,13 @@ const PayrollDetailPage = () => {
         if (employee) {
           setEmployee(employee);
         } else {
-          console.warn('従業員情報が取得できませんでした');
+          console.warn('無法取得員工資訊');
           setEmployee(null);
         }
         setError(null);
       } catch (err) {
-        console.error('データの取得に失敗しました', err);
-        setError('データの取得に失敗しました。再読み込みをお試しください。');
+        console.error('資料取得失敗', err);
+        setError('資料取得失敗，請再試一次。');
       } finally {
         setLoading(false);
       }
@@ -110,7 +110,7 @@ const PayrollDetailPage = () => {
   if (!record) {
     return (
       <div className="error-container">
-        <div className="error">給与明細が見つかりませんでした</div>
+        <div className="error">找不到薪資明細</div>
           <BackButton label='薪資發放明細査詢' navigateTo='/payroll-query'/>
       </div>
     );
@@ -125,7 +125,7 @@ const PayrollDetailPage = () => {
         <h5>發薪日期: {formatDate(record.pay_date)}</h5>
       </div>
       {/* 基本情報 セクション */}
-      {employee ? <EmployeeInfo employee={employee} showEmail={false}/> : <div>従業員情報が取得できませんでした</div>}
+      {employee ? <EmployeeInfo employee={employee} showEmail={false}/> : <div>無法取得員工資訊</div>}
 
       {/* 薪資明細 セクション */}
       <Section title="薪資明細">

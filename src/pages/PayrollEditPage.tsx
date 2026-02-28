@@ -53,13 +53,13 @@ const PayrollEditPage: React.FC = () => {
         ...(compExpiryRoc !== undefined ? { comp_expiry: compExpiryRoc } : {}),
       });
       if (payrollRes.status !== 'success' || leaveRes.status !== 'success') {
-        setError('保存に失敗しました。');
+        setError('儲存失敗。');
       } else {
         alert('修改成功');
         window.location.href = '/originaloptical-payroll-frontend';
       }
     } catch (err) {
-      setError('保存に失敗しました。');
+      setError('儲存失敗。');
     } finally {
       setLoading(false);
     }
@@ -79,14 +79,14 @@ const PayrollEditPage: React.FC = () => {
       // 休暇明細削除
       const leaveRes = await deleteLeave(deleteId);
       if (payrollRes.status !== 'success' || leaveRes.status !== 'success') {
-        setError('削除に失敗しました。');
+        setError('刪除失敗。');
       } else {
         alert('刪除成功');
         // 削除後は一覧ページへ遷移
         window.location.href = '/originaloptical-payroll-frontend';
       }
     } catch (err) {
-      setError('削除に失敗しました。');
+      setError('刪除失敗。');
     } finally {
       setLoading(false);
     }
@@ -95,7 +95,7 @@ const PayrollEditPage: React.FC = () => {
   useEffect(() => {
     const getPayrollDetail = async () => {
       if (!employeeId || !year || !month) {
-        setError('従業員IDと年月が指定されていません');
+        setError('未指定員工ID與年月');
         setLoading(false);
         return;
       }
@@ -110,7 +110,7 @@ const PayrollEditPage: React.FC = () => {
         setLeaveDetail(leaveData);
         setError(null);
       } catch (err) {
-        setError('データの取得に失敗しました。再読み込みをお試しください。');
+        setError('資料取得失敗，請再試一次。');
       } finally {
         setLoading(false);
       }
@@ -293,13 +293,13 @@ const PayrollEditPage: React.FC = () => {
 
   const validationErrors = useMemo(() => {
     const messages: string[] = [];
-    if (!payrollId) messages.push('従業員IDと年月が不足しています。');
-    if (!record) messages.push('給与データが未取得です。');
-    if (!leaveDetail) messages.push('休暇データが未取得です。');
-    if (record && !payDateRoc) messages.push('發薪日期は民国年月日(YYYMMDD)7桁で入力してください。');
-    if (leaveDetail && leaveDetail.leave_start && !leaveStartRoc) messages.push('請休期間開始は民国年(YYYMMDD)7桁で入力してください。');
-    if (leaveDetail && leaveDetail.leave_end && !leaveEndRoc) messages.push('請休期間結束は民国年(YYYMMDD)7桁で入力してください。');
-    if (leaveDetail && leaveDetail.comp_expiry && !compExpiryRoc) messages.push('勞雇約定之補休期限は民国年(YYYMMDD)7桁で入力してください。');
+    if (!payrollId) messages.push('員工ID與年月資訊不足。');
+    if (!record) messages.push('尚未取得薪資資料。');
+    if (!leaveDetail) messages.push('尚未取得休假資料。');
+    if (record && !payDateRoc) messages.push('請以民國年月日(YYYMMDD)7位數輸入發薪日期。');
+    if (leaveDetail && leaveDetail.leave_start && !leaveStartRoc) messages.push('請以民國年(YYYMMDD)7位數輸入請假起始日。');
+    if (leaveDetail && leaveDetail.leave_end && !leaveEndRoc) messages.push('請以民國年(YYYMMDD)7位數輸入請假結束日。');
+    if (leaveDetail && leaveDetail.comp_expiry && !compExpiryRoc) messages.push('請以民國年(YYYMMDD)7位數輸入勞雇約定之補休期限。');
     return messages;
   }, [payrollId, record, leaveDetail, payDateRoc, leaveStartRoc, leaveEndRoc, compExpiryRoc]);
 
@@ -322,7 +322,7 @@ const PayrollEditPage: React.FC = () => {
     return (
       <div className="payroll-edit-page">
         <div className="error-container">
-          <div className="error">給与明細が見つかりませんでした</div>
+          <div className="error">找不到薪資明細</div>
           <BackButton label="薪資管理" navigateTo="/payroll-management" />
         </div>
       </div>

@@ -46,10 +46,10 @@ const EmployeeManagementDetailPage = () => {
           if (employee) {
             setEmployee(employee);
           } else {
-            setError('従業員が見つかりません');
+            setError('找不到員工資料');
           }
         } catch (err) {
-          setError('従業員情報の取得に失敗しました');
+          setError('取得員工資訊失敗');
         } finally {
         }
       }
@@ -66,10 +66,10 @@ const EmployeeManagementDetailPage = () => {
         setSuccess('作成しました');
         navigate('/employee-management');
       } else {
-        setError(res.error || '作成に失敗しました');
+        setError(res.error || '建立失敗');
       }
     } catch (err) {
-      setError('作成に失敗しました');
+      setError('建立失敗');
     } finally {
     }
   };
@@ -83,10 +83,10 @@ const EmployeeManagementDetailPage = () => {
         setSuccess('更新しました');
         navigate('/employee-management');
       } else {
-        setError(res.error || '更新に失敗しました');
+        setError(res.error || '更新失敗');
       }
     } catch (err) {
-      setError('更新に失敗しました');
+      setError('更新失敗');
     } finally {
     }
   };
@@ -101,10 +101,10 @@ const EmployeeManagementDetailPage = () => {
         setSuccess('削除しました');
         navigate('/employee-management');
       } else {
-        setError(res.error || '削除に失敗しました');
+        setError(res.error || '刪除失敗');
       }
     } catch (err) {
-      setError('削除に失敗しました');
+      setError('刪除失敗');
     } finally {
     }
   };

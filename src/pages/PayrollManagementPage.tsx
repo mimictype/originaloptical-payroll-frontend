@@ -22,7 +22,7 @@ const PayrollManagementPage = () => {
         setEmployees(data);
         setError(null);
       } catch (err) {
-        setError('従業員データの取得に失敗しました');
+        setError('取得員工資料失敗');
       }
     };
     fetchEmployeesData();
