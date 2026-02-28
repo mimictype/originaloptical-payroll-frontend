@@ -389,7 +389,7 @@ const PayrollEditPage: React.FC = () => {
                 { label: '今年可休日數', value: String(leaveDetail.granted_days), editableLabel: false },
                 { label: '今年已休日數', value: String(leaveDetail.used_days), editableLabel: false },
                 { label: '今年未休日數', value: remainingDaysTotal, editableLabel: false, editableValue: false },
-                ...(leaveDetail.thismonth_leave_days ? [{ label: '今月請休日', value: leaveDetail.thismonth_leave_days, editableLabel: false }] : [])
+                { label: '今月請休日', value: leaveDetail.thismonth_leave_days || '', editableLabel: false }
               ]}
               onChange={handleLeaveChange}
             />

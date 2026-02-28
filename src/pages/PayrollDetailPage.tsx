@@ -194,7 +194,7 @@ const PayrollDetailPage = () => {
                 { label: '今年可休日數', value: `${leaveDetail.granted_days}` },
                 { label: '今年已休日數', value: `${leaveDetail.used_days}` },
                 { label: '今年未休日數', value: `${leaveDetail.remaining_days}` },
-                ...(leaveDetail.thismonth_leave_days ? [{ label: '今月請休日', value: leaveDetail.thismonth_leave_days }] : [])
+                { label: '今月請休日', value: leaveDetail.thismonth_leave_days || '' }
               ]}
             />
             <SalarySection
