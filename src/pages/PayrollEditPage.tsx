@@ -43,15 +43,24 @@ const PayrollEditPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
+      const payrollPayload: Partial<PayrollData> = {
+        ...record,
+        pay_date: payDateRoc ?? record.pay_date,
+      };
+
+      const leavePayload: Partial<LeaveData> = { ...leaveDetail };
+      delete leavePayload.leave_start;
+      delete leavePayload.leave_end;
+      delete leavePayload.comp_expiry;
+
+      if (leaveStartRoc !== undefined) leavePayload.leave_start = leaveStartRoc;
+      if (leaveEndRoc !== undefined) leavePayload.leave_end = leaveEndRoc;
+      if (compExpiryRoc !== undefined) leavePayload.comp_expiry = compExpiryRoc;
+
       // 給与明細更新
-      const payrollRes = await updatePayroll({ ...record, pay_date: payDateRoc ?? record.pay_date });
+      const payrollRes = await updatePayroll(payrollPayload);
       // 休暇明細更新
-      const leaveRes = await updateLeave({
-        ...leaveDetail,
-        ...(leaveStartRoc !== undefined ? { leave_start: leaveStartRoc } : {}),
-        ...(leaveEndRoc !== undefined ? { leave_end: leaveEndRoc } : {}),
-        ...(compExpiryRoc !== undefined ? { comp_expiry: compExpiryRoc } : {}),
-      });
+      const leaveRes = await updateLeave(leavePayload);
       if (payrollRes.status !== 'success' || leaveRes.status !== 'success') {
         setError('儲存失敗。');
       } else {
