@@ -128,17 +128,25 @@ const PayrollEditPage: React.FC = () => {
   }, [employeeId, year, month]);
   // 休暇明細編集時のコールバック
   const handleLeaveChange = (rows: Array<{ label: string; value: string }>) => {
-    setLeaveDetail(prev => prev ? {
-      ...prev,
-      // 0: leave_start, 1: leave_end, 2: carryover_days, 3: granted_days, 4: used_days, 5: remaining_days, 6: thismonth_leave_days
-      leave_start: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : 0,
-      leave_end: rows[1]?.value ? Number(rows[1].value.replace(/-/g, '')) : 0,
-      carryover_days: Number(rows[2]?.value) || 0,
-      granted_days: Number(rows[3]?.value) || 0,
-      used_days: Number(rows[4]?.value) || 0,
-      remaining_days: Number(rows[5]?.value) || (prev.carryover_days + prev.granted_days - prev.used_days),
-      thismonth_leave_days: rows[6]?.value || '',
-    } : prev);
+    setLeaveDetail(prev => {
+      if (!prev) return prev;
+      const updatedCarryover = Number(rows[2]?.value) || 0;
+      const updatedUsedDays = Number(rows[3]?.value) || 0;
+      const grantedBase = (Number(prev.granted_days) || 0) - (Number(prev.carryover_days) || 0);
+      const recalculatedGranted = grantedBase + updatedCarryover;
+      const recalculatedRemaining = recalculatedGranted - updatedUsedDays;
+      return {
+        ...prev,
+        // 0: leave_start, 1: leave_end, 2: carryover_days, 3: used_days, 4: remaining_days, 5: thismonth_leave_days
+        leave_start: rows[0]?.value ? Number(rows[0].value.replace(/-/g, '')) : 0,
+        leave_end: rows[1]?.value ? Number(rows[1].value.replace(/-/g, '')) : 0,
+        carryover_days: updatedCarryover,
+        granted_days: recalculatedGranted,
+        used_days: updatedUsedDays,
+        remaining_days: recalculatedRemaining,
+        thismonth_leave_days: rows[5]?.value || '',
+      };
+    });
   };
   // 加班補休編集時のコールバック
   const handleCompLeaveChange = (rows: Array<{ label: string; value: string }>) => {
@@ -288,12 +296,10 @@ const PayrollEditPage: React.FC = () => {
   // 今年未休日數合計を自動計算
   const remainingDaysTotal = React.useMemo(() => {
     if (!leaveDetail) return '';
-    return String(
-      Number(leaveDetail.carryover_days || 0) +
-      Number(leaveDetail.granted_days || 0) -
-      Number(leaveDetail.used_days || 0)
-    );
-  }, [leaveDetail]);
+    const granted = Number(leaveDetail.granted_days || 0);
+    const used = Number(leaveDetail.used_days || 0);
+    return String(granted - used);
+  }, [leaveDetail?.granted_days, leaveDetail?.used_days]);
 
   const payDateRoc = toRocNumber(record?.pay_date);
   const leaveStartRoc = toRocNumber(leaveDetail?.leave_start);
@@ -395,7 +401,6 @@ const PayrollEditPage: React.FC = () => {
                 { label: '請休期間開始', value: formatDate(leaveDetail.leave_start), editableLabel: false },
                 { label: '請休期間結束', value: formatDate(leaveDetail.leave_end), editableLabel: false },
                 { label: '經過遞延日數', value: String(leaveDetail.carryover_days), editableLabel: false },
-                { label: '今年可休日數', value: String(leaveDetail.granted_days), editableLabel: false },
                 { label: '今年已休日數', value: String(leaveDetail.used_days), editableLabel: false },
                 { label: '今年未休日數', value: remainingDaysTotal, editableLabel: false, editableValue: false },
                 { label: '今月請休日', value: leaveDetail.thismonth_leave_days || '', editableLabel: false }
